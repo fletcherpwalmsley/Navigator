@@ -17,13 +17,16 @@ def LoadData():
 
     """
 
-    path = "C:\\Users\\fletc\\Pictures\\CNN\\rivers\\converted_mask"
+    # path = "C:\\Users\\fletc\\Pictures\\CNN\\rivers\\converted_mask"
+    path = "C:\\Users\\fletc\\Pictures\\CNN\\comb_exp_mask"
     folder_list = os.listdir(path)
 
     images = []
     for folder in folder_list:
-        append_tuple = os.path.join(path, folder, 'img.png'), os.path.join(path, folder, 'label.png')
-        images.append(append_tuple)
+        img = os.path.join(path, folder, 'img.png')
+        label = os.path.join(path, folder, 'label.png')
+        if ((os.path.exists(img)) and( os.path.exists(img))):
+            images.append((img, label))
     return images
 
 
@@ -35,7 +38,8 @@ data_gen_args = dict(
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True,
-        fill_mode='nearest'
+        # fill_mode='nearest'
+        fill_mode='constant'
 )
 
 def Augment(img, mask, num_of_images):

@@ -85,8 +85,8 @@ if __name__ == "__main__":
     results = unet.fit(
         X_train,
         y_train,
-        batch_size=4,
-        epochs=20,
+        batch_size=64,
+        epochs=10,
         validation_data=(X_valid, y_valid),
         callbacks=[cp_callback],
     )
