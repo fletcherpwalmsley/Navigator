@@ -36,8 +36,8 @@ if __name__ == "__main__":
     # plt.show()
 
     # Define the desired shape
-    target_shape_img = [128, 128, 3]
-    target_shape_mask = [128, 128, 1]
+    target_shape_img = [80, 80, 3]
+    target_shape_mask = [80, 80, 1]
 
     # Process data using apt helper function
     X, y = PreprocessData(image_paths, target_shape_img, target_shape_mask)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     # y_valid = y_train
 
 
-    unet = UNetCompiled(input_size=(128, 128, 3), n_filters=32, n_classes=3)
+    unet = UNetCompiled(input_size=(80, 80, 3), n_filters=32, n_classes=3)
 
     # unet.summary()
 
@@ -76,20 +76,23 @@ if __name__ == "__main__":
     )
 
     # Training check point
-    checkpoint_path = ".weights.h5"
-    checkpoint_dir = os.path.dirname(checkpoint_path)
-    cp_callback = tf.keras.callbacks.ModelCheckpoint(
-        filepath=checkpoint_path, save_weights_only=True, verbose=1
-    )
+    # checkpoint_path = ".weights.h5"
+    # checkpoint_dir = os.path.dirname(checkpoint_path)
+    # cp_callback = tf.keras.callbacks.ModelCheckpoint(
+    #     filepath=checkpoint_path, save_weights_only=True, verbose=1
+    # )
+
 
     results = unet.fit(
         X_train,
         y_train,
         batch_size=64,
-        epochs=10,
+        epochs=40,
         validation_data=(X_valid, y_valid),
-        callbacks=[cp_callback],
+        # callbacks=[cp_callback],
     )
+
+    unet.save("models.keras")
 
     fig, axis = plt.subplots(1, 2, figsize=(20, 5))
     axis[0].plot(results.history["loss"], color="r", label="train loss")

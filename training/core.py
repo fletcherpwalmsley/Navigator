@@ -104,7 +104,7 @@ def DecoderMiniBlock(prev_layer_input, skip_layer_input, n_filters=32):
     return conv
 
 
-def UNetCompiled(input_size=(128, 128, 3), n_filters=32, n_classes=3):
+def UNetCompiled(input_size=(80, 80, 3), n_filters=32, n_classes=3):
     """
     Combine both encoder and decoder blocks according to the U-Net research paper
     Return the model as output
@@ -116,16 +116,16 @@ def UNetCompiled(input_size=(128, 128, 3), n_filters=32, n_classes=3):
     # Observe that the filters are increasing as we go deeper into the network which will increasse the # channels of the image
     cblock1 = EncoderMiniBlock(inputs, n_filters, dropout_prob=0, max_pooling=True)
     cblock2 = EncoderMiniBlock(
-        cblock1[0], n_filters * 2, dropout_prob=0, max_pooling=True
+        cblock1[0], n_filters * 2, dropout_prob=0.1, max_pooling=True
     )
     cblock3 = EncoderMiniBlock(
-        cblock2[0], n_filters * 4, dropout_prob=0, max_pooling=True
+        cblock2[0], n_filters * 4, dropout_prob=0.2, max_pooling=True
     )
     cblock4 = EncoderMiniBlock(
-        cblock3[0], n_filters * 8, dropout_prob=0.3, max_pooling=True
+        cblock3[0], n_filters * 8, dropout_prob=0.4, max_pooling=True
     )
     cblock5 = EncoderMiniBlock(
-        cblock4[0], n_filters * 16, dropout_prob=0.3, max_pooling=False
+        cblock4[0], n_filters * 16, dropout_prob=0.4, max_pooling=False
     )
 
     # Decoder includes multiple mini blocks with decreasing number of filters
