@@ -46,4 +46,3 @@ RUN cmake .. \
     -DWITH_PROTOBUF=OFF \
     -DBUILD_PROTOBUF=OFF
 RUN make -j && make install
-
