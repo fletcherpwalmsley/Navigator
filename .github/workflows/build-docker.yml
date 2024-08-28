@@ -2,13 +2,9 @@ name: Base Dependency Contatiner
 
 on:
   push:
-    branches:
-      - main  # Trigger the workflow on push to the main branch
     paths:
       - docker/navigator-base/Dockerfile # Only build if base dockerfile has changed
   pull_request:
-    branches:
-      - main  # Trigger the workflow on pull request to the main branch
     paths:
       - docker/navigator-base/Dockerfile
 
