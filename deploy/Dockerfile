@@ -47,12 +47,3 @@ RUN cmake .. \
     -DBUILD_PROTOBUF=OFF
 RUN make -j 20 && make install
 
-
-# # Compile basic example (tf-lite)
-# COPY . /app/
-# RUN mkdir /app/build
-# WORKDIR /app/build
-# RUN cmake .. && make -j 20
-
-# # # Set the entrypoint to a shell to allow for interactive use
-# ENTRYPOINT ["/bin/bash"]
