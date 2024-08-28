@@ -5,12 +5,12 @@ on:
     branches:
       - main  # Trigger the workflow on push to the main branch
     paths:
-      - deploy/Dockerfile # Only build if the dockerfile has changed
+      - docker/navigator-base/Dockerfile # Only build if base dockerfile has changed
   pull_request:
     branches:
       - main  # Trigger the workflow on pull request to the main branch
     paths:
-      - deploy/Dockerfile
+      - docker/navigator-base/Dockerfile
 
 jobs:
   build:
@@ -41,4 +41,4 @@ jobs:
       - name: Build and Push Docker image
         if: github.ref == 'refs/heads/main'  # Build and push only on the main branch
         run: |
-          docker buildx build --push --tag ghcr.io/${{ github.repository_owner }}/navigator-base:latest -f deploy/Dockerfile .
+          docker buildx build --push --tag ghcr.io/${{ github.repository_owner }}/navigator-base:latest -f docker/navigator-base/Dockerfile .

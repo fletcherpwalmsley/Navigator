@@ -1,5 +1,5 @@
 # Use a base image with a compatible version of CMake and build tools
-FROM ubuntu:24.04
+FROM debian:bookworm
 
 # Set environment variables to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,10 +23,9 @@ RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs
 
 # Create build directory and make
 WORKDIR /tensorflow_src/tflite_build
-RUN cmake ../tensorflow/lite && \
-    cmake --build . -j 20 && \
+RUN cmake ../tensorflow/lite &&
+RUN cmake --build . -j 20 && \
     cmake --install .
-
 
 # Get Opencv
 WORKDIR /
