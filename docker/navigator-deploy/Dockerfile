@@ -15,4 +15,4 @@ COPY --from=build /app/build/minimal /bin/navigator/
 ENTRYPOINT ["/bin/bash"]
 
 # Required to be run from base dir
-# docker build -t build -f deploy/docker/navigator-release/Dockerfile .
+# docker build -t build -f deploy/docker/navigator-deploy/Dockerfile .

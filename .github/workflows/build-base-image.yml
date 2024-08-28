@@ -1,4 +1,4 @@
-name: Base Dependency Contatiner
+name: Base Contatiner
 
 on:
   push:

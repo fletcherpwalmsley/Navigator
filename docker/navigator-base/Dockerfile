@@ -15,16 +15,17 @@ RUN apt-get update && apt-get install -y \
     gdb \
     && rm -rf /var/lib/apt/lists/*
 
-# Get Tensorflow-lite 
+# Get Tensorflow-lite
+WORKDIR /tensorflow
 RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
     unzip tensorflow.zip && \
     rm tensorflow.zip && \
     mv tensorflow-2.17.0 tensorflow_src
 
 # Create build directory and make
-WORKDIR /tensorflow_src/tflite_build
-RUN cmake ../tensorflow/lite
-RUN cmake --build . -j 20 && \
+WORKDIR /tensorflow/tflite_build
+RUN cmake ../tensorflow_src/tensorflow/lite && \
+    cmake --build . -j && \
     cmake --install .
 
 # Get Opencv
@@ -44,5 +45,5 @@ RUN cmake .. \
     -DOPENCV_DNN_OPENCL=OFF \
     -DWITH_PROTOBUF=OFF \
     -DBUILD_PROTOBUF=OFF
-RUN make -j 20 && make install
+RUN make -j && make install
 
