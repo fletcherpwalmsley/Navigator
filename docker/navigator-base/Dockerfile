@@ -23,7 +23,7 @@ RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs
 
 # Create build directory and make
 WORKDIR /tensorflow_src/tflite_build
-RUN cmake ../tensorflow/lite &&
+RUN cmake ../tensorflow/lite
 RUN cmake --build . -j 20 && \
     cmake --install .
 
