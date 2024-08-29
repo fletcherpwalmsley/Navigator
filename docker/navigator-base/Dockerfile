@@ -15,19 +15,6 @@ RUN apt-get update && apt-get install -y \
     gdb \
     && rm -rf /var/lib/apt/lists/*
 
-# Get Tensorflow-lite
-WORKDIR /tensorflow
-RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
-    unzip tensorflow.zip && \
-    rm tensorflow.zip && \
-    mv tensorflow-2.17.0 tensorflow_src
-
-# Create build directory and make
-WORKDIR /tensorflow/tflite_build
-RUN cmake ../tensorflow_src/tensorflow/lite && \
-    cmake --build . -j && \
-    cmake --install .
-
 # Get Opencv
 WORKDIR /
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
@@ -35,14 +22,27 @@ RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
     rm opencv.zip && \
     mv opencv-4.10.0 opencv_src
 
-# Create build directory and make
-WORKDIR /opencv_src/opencv_build
-RUN cmake .. \
-    -DCMAKE_CXX_STANDARD=14 \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_opencv_python2=OFF \
-    -DBUILD_opencv_python3=OFF \
-    -DOPENCV_DNN_OPENCL=OFF \
-    -DWITH_PROTOBUF=OFF \
-    -DBUILD_PROTOBUF=OFF
-RUN make -j && make install
+# Get Tensorflow-lite
+WORKDIR /tensorflow
+RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
+    unzip tensorflow.zip && \
+    rm tensorflow.zip && \
+    mv tensorflow-2.17.0 tensorflow_src
+
+# # Create build directory and make OpenCv
+# WORKDIR /opencv_src/opencv_build
+# RUN cmake .. \
+#     -DCMAKE_CXX_STANDARD=14 \
+#     -DBUILD_SHARED_LIBS=OFF \
+#     -DBUILD_opencv_python2=OFF \
+#     -DBUILD_opencv_python3=OFF \
+#     -DOPENCV_DNN_OPENCL=OFF \
+#     -DWITH_PROTOBUF=OFF \
+#     -DBUILD_PROTOBUF=OFF
+# RUN make -j && make install
+
+# # Create build directory and make Tensorflow Lite
+# WORKDIR /tensorflow/tflite_build
+# RUN cmake ../tensorflow_src/tensorflow/lite && \
+#     cmake --build . -j && \
+#     cmake --install .
