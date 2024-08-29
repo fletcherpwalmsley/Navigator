@@ -41,8 +41,8 @@ RUN cmake .. \
     -DBUILD_PROTOBUF=OFF
 RUN make -j && make install
 
-# # Create build directory and make Tensorflow Lite
-# WORKDIR /tensorflow/tflite_build
-# RUN cmake ../tensorflow_src/tensorflow/lite && \
-#     cmake --build . -j && \
-#     cmake --install .
+# Create build directory and make Tensorflow Lite
+WORKDIR /tensorflow/tflite_build
+RUN cmake ../tensorflow_src/tensorflow/lite && \
+    cmake --build . -j && \
+    cmake --install .
