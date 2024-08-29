@@ -36,7 +36,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          file: docker/navigator-base/Dockerfile
+          file: docker/navigator-deploy/Dockerfile
           push: true
           platforms: linux/amd64
           tags: navigator-deploy:latest
