@@ -29,17 +29,17 @@ RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs
     rm tensorflow.zip && \
     mv tensorflow-2.17.0 tensorflow_src
 
-# Create build directory and make OpenCv
-WORKDIR /opencv_src/opencv_build
-RUN cmake .. \
-    -DCMAKE_CXX_STANDARD=14 \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_opencv_python2=OFF \
-    -DBUILD_opencv_python3=OFF \
-    -DOPENCV_DNN_OPENCL=OFF \
-    -DWITH_PROTOBUF=OFF \
-    -DBUILD_PROTOBUF=OFF
-RUN make -j && make install
+# # Create build directory and make OpenCv
+# WORKDIR /opencv_src/opencv_build
+# RUN cmake .. \
+#     -DCMAKE_CXX_STANDARD=14 \
+#     -DBUILD_SHARED_LIBS=OFF \
+#     -DBUILD_opencv_python2=OFF \
+#     -DBUILD_opencv_python3=OFF \
+#     -DOPENCV_DNN_OPENCL=OFF \
+#     -DWITH_PROTOBUF=OFF \
+#     -DBUILD_PROTOBUF=OFF
+# RUN make -j && make install
 
 # # Create build directory and make Tensorflow Lite
 # WORKDIR /tensorflow/tflite_build
