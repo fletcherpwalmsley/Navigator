@@ -3,10 +3,8 @@ name: Base Contatiner
 on:
   push:
     paths:
-      - docker/navigator-base/Dockerfile # Only build if base dockerfile has changed
-  pull_request:
-    paths:
-      - docker/navigator-base/Dockerfile
+      - docker/navigator-base/Dockerfile # Build if base dockerfile has changed
+      - .github/workflows/build-base-image.yml # Build if this file has changed
 
 jobs:
   build:
