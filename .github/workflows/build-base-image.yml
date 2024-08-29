@@ -23,13 +23,13 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
           file: docker/navigator-base/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: navigator-base:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          context: .
 
       # - name: Build and Push Docker image
       #   if: github.ref == 'refs/heads/main'  # Build and push only on the main branch
