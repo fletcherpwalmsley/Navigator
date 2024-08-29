@@ -7,6 +7,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -20,21 +23,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Build and push
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     file: docker/navigator-base/Dockerfile
-      #     push: true
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     tags: navigator-base:latest
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
-      #     context: .
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          file: docker/navigator-base/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64/v8
+          tags: navigator-base:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          context: .
 
-      - name: Build and Push Docker image
-        if: github.ref == 'refs/heads/main'  # Build and push only on the main branch
-        run: |
-          docker buildx build --cache-from type=gha --cache-to type=gha,mode=max --platform linux/amd64,linux/arm64/v8 --push --tag ghcr.io/${{ github.repository_owner }}/navigator-base:latest -f docker/navigator-base/Dockerfile .
+      # - name: Build and Push Docker image
+      #   if: github.ref == 'refs/heads/main'  # Build and push only on the main branch
+      #   run: |
+      #     docker buildx build --cache-from type=gha --cache-to type=gha,mode=max --platform linux/amd64,linux/arm64/v8 --push --tag ghcr.io/${{ github.repository_owner }}/navigator-base:latest -f docker/navigator-base/Dockerfile .
 
       # - name: Build and push Docker image
       #   uses: docker/build-push-action@v5
