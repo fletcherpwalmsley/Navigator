@@ -39,10 +39,10 @@ RUN cmake .. \
     -DOPENCV_DNN_OPENCL=OFF \
     -DWITH_PROTOBUF=OFF \
     -DBUILD_PROTOBUF=OFF
-RUN make -j && make install
+RUN make -j 20 && make install
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
 RUN cmake ../tensorflow_src/tensorflow/lite && \
-    cmake --build . -j && \
+    cmake --build . -j 20 && \
     cmake --install .
