@@ -5,7 +5,7 @@ FROM ghcr.io/fletcherpwalmsley/navigator-base:latest AS build
 COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
-RUN cmake .. && make -j
+RUN cmake .. && make -j 10
 
 # Create a slim container for deployment
 FROM debian:bookworm-slim
