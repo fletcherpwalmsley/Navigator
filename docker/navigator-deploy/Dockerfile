@@ -10,6 +10,7 @@ RUN cmake .. && make -j 10
 # Create a slim container for deployment
 FROM debian:bookworm-slim
 COPY --from=build /app/build/minimal /bin/navigator/
+COPY training/output/model.tflite /bin/navigator/
 
 # Set the entrypoint to a shell to allow for interactive use, if needed
 ENTRYPOINT ["/bin/bash"]
