@@ -62,12 +62,12 @@ cv::Mat ApplyArgmax(const float* output_data, int height, int width, int num_cla
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    fprintf(stderr, "minimal <tflite model>\n");
-    return 1;
-  }
+  // if (argc != 2) {
+  //   fprintf(stderr, "minimal <tflite model>\n");
+  //   return 1;
+  // }
   const char* image_filename = argv[1];
-  const char* filename = "../model.tflite";
+  const char* filename = "model.tflite";
 
   // Load model
   std::unique_ptr<tflite::FlatBufferModel> model =
