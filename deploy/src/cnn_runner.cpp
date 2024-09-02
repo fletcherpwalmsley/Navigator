@@ -12,6 +12,7 @@
 #include "tensorflow/lite/model_builder.h"
 #include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/optional_debug_tools.h"
 #include "helpers.h"
 
 TFliteRunner::TFliteRunner(std::string filename) {
@@ -23,7 +24,6 @@ TFliteRunner::TFliteRunner(std::string filename) {
     // Build model
     tflite::ops::builtin::BuiltinOpResolver resolver;
     tflite::InterpreterBuilder builder(*model, resolver);
-    m_interpreter = std::make_unique<tflite::Interpreter>();
     builder(&m_interpreter);
     NULL_CHECK(m_interpreter != nullptr);
 
@@ -37,11 +37,22 @@ TFliteRunner::TFliteRunner(std::string filename) {
         std::cerr << "Error: Expected input tensor to be of type float32!" << std::endl;
         exit(1);
   }
+    // NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
+    tflite::PrintInterpreterState(m_interpreter.get());
 }
 
-float* TFliteRunner::DoInference(cv::Mat& input_mat) {
-    std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
-    NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
+float* TFliteRunner::DoInference(cv::Mat /*input_mat*/) {
+    // std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
+    // std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
+    NULL_CHECK(m_interpreter != nullptr);
+        // Ensure that tensors are allocated and valid
+    if (m_interpreter->inputs().empty()) {
+        std::cerr << "Error: No input tensors available!" << std::endl;
+        exit(1);
+    }
+
+    tflite::PrintInterpreterState(m_interpreter.get());
+    // NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
 
     // Get the output tensor
     int output_tensor_index = m_interpreter->outputs()[0];

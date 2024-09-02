@@ -18,7 +18,7 @@
 
 class CNNRunner {
 public:
-    virtual float* DoInference(cv::Mat& input_mat) = 0;
+    virtual float* DoInference(cv::Mat input_mat) = 0;
     // For when you need to know what size your cv:Mat must be
     virtual cv::Size GetInputSize() const = 0;
     // For when you need to know what you're getting out
@@ -30,7 +30,7 @@ public:
 class TFliteRunner : public CNNRunner {
 public:
     TFliteRunner(std::string model_path);
-    float* DoInference(cv::Mat& input_mat);
+    float* DoInference(cv::Mat input_mat);
     cv::Size GetInputSize() const;
     int GetOutputHeight() const;
     int GetOutputWidth() const;

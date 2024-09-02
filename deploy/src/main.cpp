@@ -15,9 +15,9 @@ int main(int argc, char* argv[]) {
   //   fprintf(stderr, "minimal <tflite model>\n");
   //   return 1;
   // }
-  const char* image_filename = argv[1];
+  // const char* image_filename = argv[1];
 
-  // std::string imagePath = "../image.png";
+  std::string image_filename = "image.png";
   cv::Mat import_image = cv::imread(image_filename, cv::IMREAD_COLOR);
   if (import_image.empty()) {
     std::cerr << "Error: Could not open or find the image at " << image_filename << std::endl;
@@ -25,13 +25,14 @@ int main(int argc, char* argv[]) {
   }
 
   cv::Mat image;
+  cv::Mat mask;
   cv::cvtColor(import_image, image, cv::COLOR_BGR2RGB);
 
-  std::unique_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("model.tflite");
-  RiverMaskGenerator river_mask_generator(std::move(runner));
+  std::shared_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("/workspaces/Navigator/training/output/model.tflite");
+  RiverMaskGenerator river_mask_generator(runner);
 
-  // image = river_mask_generator.GenerateMask(image);
+  mask = river_mask_generator.GenerateMask(image);
   // Save the mask
-  // cv::imwrite("output/mask.jpeg", mask);
+  cv::imwrite("mask.jpeg", mask);
   return 0;
 }

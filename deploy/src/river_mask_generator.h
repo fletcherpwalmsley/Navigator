@@ -18,11 +18,14 @@
 
 class RiverMaskGenerator {
 private:
-    std::unique_ptr<CNNRunner> m_runner;
+    std::shared_ptr<CNNRunner> m_runner;
 public:
-    RiverMaskGenerator(std::unique_ptr<CNNRunner> runner)
-    : m_runner(std::move(runner)) {
+    RiverMaskGenerator(std::shared_ptr<CNNRunner> runner)
+    : m_runner(runner) {
         NULL_CHECK(m_runner);
     }
     cv::Mat GenerateMask(cv::Mat input_mat);
+
+private:
+    int VerifyRunner();
 };
