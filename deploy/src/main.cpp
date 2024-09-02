@@ -40,27 +40,6 @@ int main(int argc, char* argv[]) {
   resizedImage.convertTo(resizedImage, CV_32FC2, 1.0 / 255.0);
 
 
-  // Check tensor shape and type
-  if (interpreter->tensor(interpreter->inputs()[0])->type != kTfLiteFloat32) {
-      std::cerr << "Error: Expected input tensor to be of type float32!" << std::endl;
-      return -1;
-  }
-
-  std::memcpy(interpreter->typed_input_tensor<float>(0), resizedImage.ptr<float>(0), resizedImage.total() * resizedImage.elemSize());
-
-  // Run inference
-  TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
-
-  // Get the output tensor
-  int output_tensor_index = interpreter->outputs()[0];
-  TfLiteTensor* output_tensor = interpreter->tensor(output_tensor_index);
-
-  // Check tensor type
-  if (output_tensor->type != kTfLiteFloat32) {
-      std::cerr << "Error: Expected output tensor to be of type float32!" << std::endl;
-      return -1;
-  }
-
   // Get dimensions
   const int height = output_tensor->dims->data[1];
   const int width = output_tensor->dims->data[2];

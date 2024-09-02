@@ -11,11 +11,11 @@
 #pragma once
 #include <opencv2/core/mat.hpp>
 /**
- * @brief null ptr check macro taken from 
+ * @brief null check macro taken from 
  * tensorflow/lite/examples/minimal/minimal.cc
  * 
  */
-#define NULL_PTR_CHECK(x)                                    \
+#define NULL_CHECK(x)                                    \
   if (!(x)) {                                                \
     fprintf(stderr, "Error at %s:%d\n", __FILE__, __LINE__); \
     exit(1);                                                 \
