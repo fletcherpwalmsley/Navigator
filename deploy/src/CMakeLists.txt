@@ -1,8 +1,9 @@
-# Builds the minimal Navigator deploy example.
+# Navigator Cmake file.
 
 cmake_minimum_required(VERSION 3.16)
-project(minimal C CXX)
+project(navigator C CXX)
 
+# Include Tflite and OpenCV Items
 set(TENSORFLOW_SOURCE_DIR "/tensorflow/tensorflow_src" CACHE PATH
   "Directory that contains the TensorFlow project"
 )
@@ -23,10 +24,17 @@ add_subdirectory(
 )
 
 set(CMAKE_CXX_STANDARD 17)
-add_executable(minimal
-  minimal.cc
+
+target_compile_options(navigator PRIVATE -O3)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(navigator PRIVATE -O0)
+
+
+add_executable(navigator
+  main.cpp
+  tflite_handler.cpp
 )
-target_link_libraries(minimal
+target_link_libraries(navigator
   tensorflow-lite
   ${OpenCV_LIBS}
 )
