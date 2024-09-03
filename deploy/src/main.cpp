@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   cv::Mat mask;
   cv::cvtColor(import_image, image, cv::COLOR_BGR2RGB);
 
-  std::shared_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("/workspaces/Navigator/training/output/model.tflite");
+  std::shared_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("model.tflite");
   RiverMaskGenerator river_mask_generator(runner);
 
   mask = river_mask_generator.GenerateMask(image);
