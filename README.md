@@ -6,9 +6,18 @@ A vision base navigation system for controlling small boats down narrow rivers
 
 Contains all the items needed to create the system. Including training the model, C++ inference program, Go based display web server (to-do), and Github Actions for automated CI deployment. 
 
-Navigator is dockerised and releases are provided for Linux x86-64 and Linux ARMV8 (64bit Raspberry Pi's) \
+## Quick Start
+Navigator is dockerised and releases are provided for both Linux x86-64 and Linux ARMV8 (64bit Raspberry Pi's) \
 The easiest way to use Navigator is to clone the latest `navigator-deploy` container from this repo - That can be done in with this command: \
 ```docker pull ghcr.io/fletcherpwalmsley/navigator-deploy:latest```
+
+_TODO: Add start instuctions when there is an elegent way to get running_
+
+## Development guide
+### CNN Training 
+_TODO_
+### Inference development
+_TODO_
 
 ## Current issues
 ### CI
