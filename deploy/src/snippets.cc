@@ -1,1 +1,0 @@
-tflite::PrintInterpreterState(interpreter.get());
