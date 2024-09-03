@@ -14,6 +14,7 @@
 #include <opencv2/core/mat.hpp>
 
 #include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/model_builder.h"
 
 
 class CNNRunner {
@@ -38,4 +39,5 @@ public:
 
 private:
     std::unique_ptr<tflite::Interpreter> m_interpreter;
+    std::unique_ptr<tflite::FlatBufferModel> m_model;
  };

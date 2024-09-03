@@ -9,7 +9,6 @@
 
 #include "cnn_runner.h"
 
-#include "tensorflow/lite/model_builder.h"
 #include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/optional_debug_tools.h"
@@ -17,13 +16,12 @@
 
 TFliteRunner::TFliteRunner(std::string filename) {
     // Load model
-    std::unique_ptr<tflite::FlatBufferModel> model =
-        tflite::FlatBufferModel::BuildFromFile(filename.c_str());
-    NULL_CHECK(model != nullptr);
+    m_model = tflite::FlatBufferModel::BuildFromFile(filename.c_str());
+    NULL_CHECK(m_model != nullptr);
 
     // Build model
     tflite::ops::builtin::BuiltinOpResolver resolver;
-    tflite::InterpreterBuilder builder(*model, resolver);
+    tflite::InterpreterBuilder builder(*m_model, resolver);
     builder(&m_interpreter);
     NULL_CHECK(m_interpreter != nullptr);
 
@@ -37,22 +35,12 @@ TFliteRunner::TFliteRunner(std::string filename) {
         std::cerr << "Error: Expected input tensor to be of type float32!" << std::endl;
         exit(1);
   }
-    // NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
-    tflite::PrintInterpreterState(m_interpreter.get());
 }
 
-float* TFliteRunner::DoInference(cv::Mat /*input_mat*/) {
-    // std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
-    // std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
+float* TFliteRunner::DoInference(cv::Mat input_mat) {
+    std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0), input_mat.total() * input_mat.elemSize());
     NULL_CHECK(m_interpreter != nullptr);
-        // Ensure that tensors are allocated and valid
-    if (m_interpreter->inputs().empty()) {
-        std::cerr << "Error: No input tensors available!" << std::endl;
-        exit(1);
-    }
-
-    tflite::PrintInterpreterState(m_interpreter.get());
-    // NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
+    NULL_CHECK(m_interpreter->Invoke() == kTfLiteOk);
 
     // Get the output tensor
     int output_tensor_index = m_interpreter->outputs()[0];
