@@ -13,6 +13,13 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     gdb \
+    ffmpeg \
+    libavformat-dev \
+    libavcodec-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Get Opencv
@@ -32,14 +39,16 @@ RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs
 # Create build directory and make OpenCv
 WORKDIR /opencv_src/opencv_build
 RUN cmake .. \
-    -DCMAKE_CXX_STANDARD=14 \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_opencv_python2=OFF \
-    -DBUILD_opencv_python3=OFF \
-    -DOPENCV_DNN_OPENCL=OFF \
-    -DWITH_PROTOBUF=OFF \
-    -DBUILD_PROTOBUF=OFF
-RUN make -j 20 && make install
+    -D CMAKE_CXX_STANDARD=14 \
+    -D BUILD_SHARED_LIBS=OFF \
+    -D BUILD_opencv_python2=OFF \
+    -D BUILD_opencv_python3=OFF \
+    -D OPENCV_DNN_OPENCL=OFF \
+    -D WITH_PROTOBUF=OFF \
+    -D BUILD_PROTOBUF=OFF \
+    -D WITH_GSTREAMER=ON \
+    -D WITH_FFMPEG=ON \
+    && make -j 20 && make install
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
