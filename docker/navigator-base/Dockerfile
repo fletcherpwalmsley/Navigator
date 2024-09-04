@@ -37,7 +37,7 @@ RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
 # Create build directory and make OpenCv
 WORKDIR /opencv_src/opencv_build
 RUN cmake .. \
-    -D CMAKE_CXX_STANDARD=14 \
+    -D CMAKE_CXX_STANDARD=17 \
     -D BUILD_SHARED_LIBS=OFF \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=OFF \
@@ -50,6 +50,7 @@ RUN cmake .. \
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
-RUN cmake ../tensorflow_src/tensorflow/lite && \
+RUN cmake ../tensorflow_src/tensorflow/lite \
+    -D CMAKE_CXX_STANDARD=17 && \
     cmake --build . -j 20 && \
     cmake --install .
