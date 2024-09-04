@@ -1,6 +1,7 @@
 {
     "cmake.sourceDirectory": "${workspaceFolder}/deploy/src",
     "cmake.buildDirectory": "${workspaceFolder}/deploy/src/build",
+    "cmake.preferredGenerators": ["GCC 12.2.0 x86_64-linux-gnu"],
     "C_mantic.headerGuard.style": "Add #pragma once",
     "C_Cpp.doxygen.generatedStyle": "/**"
 }
