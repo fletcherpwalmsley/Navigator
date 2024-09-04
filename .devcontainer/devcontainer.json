@@ -16,7 +16,7 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "cd deploy/src && cmake ."
+	"postCreateCommand": "mkdir deploy/src/build && cd deploy/src/build && cmake .."
 
 	// Configure tool-specific properties.
 	// "customizations": {},
