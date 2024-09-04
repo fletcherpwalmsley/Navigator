@@ -3,6 +3,7 @@
     "cmake.buildDirectory": "${workspaceFolder}/deploy/src/build",
     "C_mantic.headerGuard.style": "Add #pragma once",
     "C_Cpp.doxygen.generatedStyle": "/**",
+    "editor.formatOnSave": true,
     "files.associations": {
         "*.main": "cpp"
     }
