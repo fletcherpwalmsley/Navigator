@@ -1,0 +1,6 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/deploy/src",
+    "cmake.buildDirectory": "${workspaceFolder}/deploy/src/build",
+    "C_mantic.headerGuard.style": "Add #pragma once",
+    "C_Cpp.doxygen.generatedStyle": "/**"
+}
