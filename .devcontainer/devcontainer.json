@@ -8,27 +8,22 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
-
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "mkdir deploy/src/build && cd deploy/src/build && cmake ..",
-
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-vscode.cpptools-extension-pack",
 				"streetsidesoftware.code-spell-checker",
 				"tdennis4496.cmantic",
-				"xaver.clang-format"
+				"PKief.material-icon-theme"
 			]
 		}
 	}
-
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
 }
