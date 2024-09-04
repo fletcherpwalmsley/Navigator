@@ -5,7 +5,8 @@ FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install essential packages and dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && 
+    apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     vim \
@@ -22,19 +23,16 @@ RUN apt-get update && apt-get install -y \
     libgstreamer-plugins-base1.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Get Opencv
+# Get Opencv and Tensorflow Lite
 WORKDIR /
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
     unzip opencv.zip && \
     rm opencv.zip && \
-    mv opencv-4.10.0 opencv_src
-
-# Get Tensorflow-lite
-WORKDIR /tensorflow
-RUN wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
+    mv opencv-4.10.0 opencv_src && \
+    wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
     unzip tensorflow.zip && \
     rm tensorflow.zip && \
-    mv tensorflow-2.17.0 tensorflow_src
+    mv tensorflow-2.17.0 /tensorflow/tensorflow_src
 
 # Create build directory and make OpenCv
 WORKDIR /opencv_src/opencv_build
@@ -44,8 +42,8 @@ RUN cmake .. \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=OFF \
     -D OPENCV_DNN_OPENCL=OFF \
-    -D WITH_PROTOBUF=OFF \
     -D BUILD_PROTOBUF=OFF \
+    -D WITH_PROTOBUF=OFF \
     -D WITH_GSTREAMER=ON \
     -D WITH_FFMPEG=ON \
     && make -j 20 && make install
