@@ -4,6 +4,7 @@
     "C_mantic.headerGuard.style": "Add #pragma once",
     "C_Cpp.doxygen.generatedStyle": "/**",
     "editor.formatOnSave": true,
+    "material-icon-theme.activeIconPack": "angular",
     "files.associations": {
         "*.main": "cpp"
     }

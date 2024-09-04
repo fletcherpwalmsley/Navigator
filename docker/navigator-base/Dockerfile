@@ -5,7 +5,7 @@ FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install essential packages and dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     vim \
@@ -31,6 +31,7 @@ RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
     wget -O tensorflow.zip https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.zip && \
     unzip tensorflow.zip && \
     rm tensorflow.zip && \
+    mkdir /tensorflow && \
     mv tensorflow-2.17.0 /tensorflow/tensorflow_src
 
 # Create build directory and make OpenCv
