@@ -6,6 +6,7 @@
     "editor.formatOnSave": true,
     "material-icon-theme.activeIconPack": "angular",
     "files.associations": {
-        "*.main": "cpp"
+        "*.main": "cpp",
+        "ostream": "cpp"
     }
 }
