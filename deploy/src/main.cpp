@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
-// #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <utility>
-// #include <opencv2/highgui/highgui.hpp>
-// #include <opencv2/imgcodecs.hpp>
 
 #include "cnn_runner.h"
 #include "river_mask_generator.h"
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
   //   return -1;
   // }
 
-  std::cout << cv::getBuildInformation();
+  // std::cout << cv::getBuildInformation();
   cv::VideoCapture cap(video_filename);
   if (!cap.isOpened()) {
     std::cout << "Error opening video file: " << video_filename << std::endl;
@@ -36,13 +36,15 @@ int main(int argc, char* argv[]) {
   int frame_height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
   int number_of_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
 
-  // Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
-  cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
-                        cv::Size(frame_width, frame_height));
-
   // Setup mask network
   std::shared_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("model.tflite");
   RiverMaskGenerator river_mask_generator(runner);
+
+  // Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
+  // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
+  //                       cv::Size(frame_width, frame_height));
+  cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
+                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
 
   int frame_num = 0;
   while (1) {
