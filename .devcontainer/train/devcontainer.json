@@ -1,0 +1,21 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "Training environment, with GPU support",
+	"image": "tensorflow/tensorflow:latest-gpu",
+	"runArgs": [
+		"--gpus",
+		"all"
+	],
+	"postCreateCommand": "pip install -r training/requirements.txt",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"streetsidesoftware.code-spell-checker",
+				"PKief.material-icon-theme",
+				"ms-azuretools.vscode-docker",
+				"ms-python.python"
+			]
+		}
+	}
+}

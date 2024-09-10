@@ -1,5 +1,5 @@
-imageio==2.34.2
-matplotlib==3.9.0
-scikit-learn==1.5.0
-tensorflow==2.16.2
-labelme==5.5.0
+matplotlib~=3.0
+scikit-learn~=1.0
+tensorflow~=2.0
+#Include if you want to annotate images. If installed in the container, you'll need to setup x11 forwarding
+# labelme~=5.0 
