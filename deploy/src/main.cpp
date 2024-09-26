@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   cv::VideoWriter video;
   video.open(
       "appsrc ! videoconvert ! x264enc noise-reduction=10000 tune=zerolatency byte-stream=true threads=4 ! mpegtsmux ! "
-      "webrtcsink",
+      "webrtcsink run-signalling-server=true run-web-server=true",
       0, (double)30, cv::Size(640, 480), true);
   if (!video.isOpened()) {
     printf("=ERR= can't create video writer\n");
