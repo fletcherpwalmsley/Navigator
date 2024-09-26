@@ -36,8 +36,8 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN git clone https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git 
 WORKDIR /gst-plugins-rs
-RUN cargo install cargo-c \
-    cargo cbuild --release -p gst-plugin-webrtc --prefix=/usr \
+RUN cargo install cargo-c  && \
+    cargo cbuild --release -p gst-plugin-webrtc --prefix=/usr && \
     cargo cinstall --release -p gst-plugin-webrtc --prefix=/usr
 
 # gst-inspect-1.0 webrtcsink
@@ -46,6 +46,7 @@ RUN cargo install cargo-c \
 
 # Get Opencv and Tensorflow Lite
 
+WORKDIR /
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
     unzip opencv.zip && \
     rm opencv.zip && \
@@ -67,7 +68,7 @@ RUN cmake .. \
     -D BUILD_PROTOBUF=OFF \
     -D WITH_PROTOBUF=OFF \
     -D WITH_GSTREAMER=ON \
-    -D WITH_FFMPEG=ON \
+    -D WITH_FFMPEG=OFF \
     && make -j 20 && make install
 
 # Create build directory and make Tensorflow Lite
