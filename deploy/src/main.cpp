@@ -1,3 +1,6 @@
+#include <gst/app/gstappsrc.h>
+#include <gst/gst.h>
+
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -43,8 +46,18 @@ int main(int argc, char* argv[]) {
   // Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
   // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
   //                       cv::Size(frame_width, frame_height));
-  cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
-                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+  // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
+  //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+
+  cv::VideoWriter video;
+  video.open(
+      "appsrc ! videoconvert ! x264enc noise-reduction=10000 tune=zerolatency byte-stream=true threads=4 ! mpegtsmux ! "
+      "webrtcsink",
+      0, (double)30, cv::Size(640, 480), true);
+  if (!video.isOpened()) {
+    printf("=ERR= can't create video writer\n");
+    return -1;
+  }
 
   int frame_num = 0;
   while (1) {
