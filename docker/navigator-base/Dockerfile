@@ -13,13 +13,14 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     gdb \
-    ffmpeg \
     libavformat-dev \
     libavcodec-dev \
     libavutil-dev \
     libswscale-dev \
     libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-rtsp \
     && rm -rf /var/lib/apt/lists/*
 
 # Get Opencv and Tensorflow Lite
@@ -45,7 +46,7 @@ RUN cmake .. \
     -D BUILD_PROTOBUF=OFF \
     -D WITH_PROTOBUF=OFF \
     -D WITH_GSTREAMER=ON \
-    -D WITH_FFMPEG=ON \
+    -D WITH_FFMPEG=OFF \
     && make -j 20 && make install
 
 # Create build directory and make Tensorflow Lite

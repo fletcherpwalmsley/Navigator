@@ -43,8 +43,13 @@ int main(int argc, char* argv[]) {
   // Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
   // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
   //                       cv::Size(frame_width, frame_height));
-  cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
-                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+  // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
+  //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+
+  cv::VideoWriter video(
+      "appsrc ! videoconvert ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast bitrate=600 key-int-max=4 ! "
+      "video/x-h264,profile=baseline' ! rtspclientsink location=rtsp://localhost:8554/mystream",
+      0, 2.0, cv::Size(frame_width, frame_height), false);
 
   int frame_num = 0;
   while (1) {
