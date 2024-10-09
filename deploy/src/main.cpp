@@ -15,7 +15,8 @@ int main(int argc, char* argv[]) {
   //   fprintf(stderr, "minimal <tflite model>\n");
   //   return 1;
   // }
-  const char* video_filename = argv[1];
+  // const char* video_filename = argv[1];
+  const char* video_filename = "river.mp4";
 
   // std::string image_filename = "image.png";
   // cv::Mat import_image = cv::imread(image_filename, cv::IMREAD_COLOR);
@@ -46,10 +47,18 @@ int main(int argc, char* argv[]) {
   // cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
   //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
 
-  cv::VideoWriter video(
-      "appsrc ! videoconvert ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast bitrate=600 key-int-max=4 ! "
-      "video/x-h264,profile=baseline' ! rtspclientsink location=rtsp://localhost:8554/mystream",
-      0, 2.0, cv::Size(frame_width, frame_height), false);
+  std::string mediamtx_h264 =
+      "appsrc ! videoconvert ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast bitrate=600 key-int-max=2 ! "
+      "video/x-h264,profile=baseline ! rtspclientsink location=rtsp://localhost:8554/mystream";
+
+  // AV1 requires gst-plugin-rs for rtpav1pay. But these need to be compiled from source
+  // If I think I need the savings that AV1 will provide, I can go this route
+  std::string mediamtx_av1 =
+      "appsrc ! videoconvert ! video/x-raw,format=I420 ! av1enc ! rtpav1pay ! rtspclientsink "
+      "location=rtsp://localhost:8554/mystream";
+
+  cv::VideoWriter video(mediamtx_h264, cv::CAP_GSTREAMER, 1.0,
+                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
 
   int frame_num = 0;
   while (1) {
