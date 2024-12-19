@@ -163,3 +163,4 @@ cython_debug/
 
 # Don't check in the h5 artifact
 .weights.h5
+*.mp4
