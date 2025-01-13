@@ -26,7 +26,7 @@ add_subdirectory(
 set(CMAKE_CXX_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 # set(CMAKE_CXX_FLAGS "-Wall -Wextra")
@@ -38,6 +38,7 @@ add_executable(navigator
   main.cpp
   cnn_runner.cpp
   river_mask_generator.cpp
+  process_video.cpp
 )
 target_link_libraries(navigator
   tensorflow-lite
