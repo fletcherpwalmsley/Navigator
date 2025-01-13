@@ -1,0 +1,12 @@
+apt:
+curl
+libssl-dev
+libgstreamer-plugins-bad1.0-dev
+
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+git clone https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git
+cd gst-plugins-rs
+cargo install cargo-c
+cargo cbuild --release -p gst-plugin-webrtc --prefix=/usr
+cargo cinstall --release -p gst-plugin-webrtc --prefix=/usr
