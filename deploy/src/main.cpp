@@ -16,12 +16,13 @@
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    std::cerr << "Need file to process (image or video)" << std::endl;
+  if (argc != 3) {
+    std::cerr << "Need video and model to process: navigator <video_path> <model_path>" << std::endl;
     return 1;
   }
 
   std::filesystem::path file_path = argv[1];
+  std::filesystem::path model_path = argv[2];
 
   if (!file_path.has_extension()) {
     std::cerr << "Error: File path must have an extension" << std::endl;
@@ -45,11 +46,11 @@ int main(int argc, char* argv[]) {
   // Default resolutions of the frame are obtained.The default resolutions are system dependent.
 
   // Setup mask network
-  std::unique_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>("../../../training/output/model.tflite");
+  std::unique_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>(model_path);
   cv::VideoWriter video("mask_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
                         cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
-  VideoHandler handler(file_path);
-  handler.setFrameRate(20);
+  VideoHandler handler(file_path, model_path);
+  handler.setFrameRate(30);
   while (handler.isDataWaiting()) {
     video.write(handler.processFrame());
   }
