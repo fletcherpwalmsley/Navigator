@@ -8,6 +8,10 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
+	// Add SSH mount to allow git to work with the local SSH keys
+	"mounts": [
+		"type=bind,src=${localEnv:HOME}/.ssh,dst=/workspaces/Navigator/.ssh"
+	],
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -18,5 +22,10 @@
 				"ms-azuretools.vscode-docker"
 			]
 		}
-	}
+	},
+	"runArgs": [
+		"--net",
+		"host",
+		"--privileged"
+	]
 }
