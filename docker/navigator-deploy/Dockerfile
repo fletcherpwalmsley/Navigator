@@ -11,7 +11,7 @@ RUN cmake .. && make -j 10
 FROM debian:bookworm-slim
 # Install runtime deps
 # Install essential packages and dependencies
-# At some point, update the base container to remove FFMPEG 
+# At some point, update the base container to remove FFMPEG
 RUN apt-get update && apt-get install -y \
     libgstreamer1.0-0 \
     libgstreamer-plugins-base1.0-0 \
