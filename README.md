@@ -11,7 +11,7 @@ Navigator is dockerised and releases are provided for both Linux x86-64 and Linu
 The easiest way to use Navigator is to clone the latest `navigator-deploy` container from this repo - That can be done in with this command: \
 ```docker pull ghcr.io/fletcherpwalmsley/navigator-deploy:latest```
 Currently you have to manualy run Navigator, this is done with:
-```docker run -it --rm --privileged --net host ghcr.io/fletcherpwalmsley/navigator-deploy:latest```
+```docker run -it --rm --privileged --net host -v <local_video_path>:/river_videos ghcr.io/fletcherpwalmsley/navigator-deploy:latest```
 
 _TODO: Add start instuctions when there is an elegent way to get running_
 
