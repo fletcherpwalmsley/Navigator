@@ -20,12 +20,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-            lfs: false
+            lfs: true
       - name: LFS checkout
         run: |
           git lfs install --local
           # disable credentials by actions/checkout for LFS endpoints
-          git  -c "http.${GITHUB_SERVER_URL}/storage/lfs/.extraHeader=" lfs pull
+          git lfs pull
+          git lfs pull
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
