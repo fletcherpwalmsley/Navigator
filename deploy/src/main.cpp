@@ -13,6 +13,7 @@
 #include "process_video.h"
 #include "river_mask_generator.h"
 
+
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
 int main(int argc, char* argv[]) {
