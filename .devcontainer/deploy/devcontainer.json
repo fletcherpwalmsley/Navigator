@@ -8,9 +8,11 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/Navigator,type=bind",
+	"workspaceFolder": "/Navigator",
 	// Add SSH mount to allow git to work with the local SSH keys
 	"mounts": [
-		"type=bind,src=${localEnv:HOME}/.ssh,dst=/workspaces/Navigator/.ssh"
+		"type=bind,src=${localEnv:HOME}/.ssh,dst=/Navigator/.ssh"
 	],
 	"customizations": {
 		"vscode": {
@@ -25,7 +27,6 @@
 	},
 	"runArgs": [
 		"--net",
-		"host",
-		"--privileged"
+		"host"
 	]
 }
