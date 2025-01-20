@@ -23,7 +23,15 @@ void VideoHandler::setFrameRate(size_t desiredFPS) {
 
 bool VideoHandler::isDataWaiting() {
   size_t i = 0;
-  m_cap.grab();
+
+  if (!m_cap.grab()) {
+    return false;
+  }
+
+  if (m_numProcessedFrames >= (m_totalNumFrames / m_skipFrames)) {
+    return false;
+  }
+
   while (i++ <= m_skipFrames) {
     if (!m_cap.retrieve(m_currentFrame)) {
       return false;
