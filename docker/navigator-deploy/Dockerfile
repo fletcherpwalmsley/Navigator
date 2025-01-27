@@ -5,7 +5,11 @@ FROM ghcr.io/fletcherpwalmsley/navigator-base:latest AS build
 COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
-RUN cmake .. && make -j 10
+RUN cmake .. && make -j
+RUN curl -L -o /model.tar.gz\ 
+https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
+RUN tar xf model.tar.gz
+
 
 # Create a slim container for deployment
 FROM debian:bookworm-slim
@@ -15,10 +19,10 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     libgstreamer1.0-0 \
     libgstreamer-plugins-base1.0-0 \
-    ffmpeg \
+    gstreamer1.0-rtsp \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/build/navigator /bin/navigator/
-COPY training/output/model.tflite /bin/navigator/
+COPY --from=build model.tar.gz /bin/navigator/model.tar.gz
 
 # Set the entrypoint to a shell to allow for interactive use, if needed
 ENTRYPOINT ["/bin/bash"]
