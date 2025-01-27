@@ -9,12 +9,10 @@ RUN apt-get update&& apt-get install -y \
     build-essential \
     cmake \
     vim \
-    clang \
     git \
     wget \
     unzip \
     gdb \
-    ffmpeg \
     libavformat-dev \
     libavcodec-dev \
     libavutil-dev \
@@ -41,8 +39,8 @@ RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.11.0.zip && \
 # Create build directory and make OpenCv
 WORKDIR /opencv_src/opencv_build
 RUN cmake .. \
-    -D CMAKE_CXX_STANDARD=17 \
-    -D CMAKE_C_COMPILER=clang \
+    -D CMAKE_CXX_STANDARD=20 \
+    -D CMAKE_C_COMPILER=gcc \
     -D BUILD_SHARED_LIBS=OFF \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=OFF \
@@ -65,11 +63,11 @@ RUN cmake .. \
     -D BUILD_opencv_calib3d=OFF \
     -D BUILD_opencv_highgui=OFF \
     -D BUILD_opencv_imgcodecs=OFF \
-    && make -j 20 && make install
+    && make -j 3 && make install
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
 RUN cmake ../tensorflow_src/tensorflow/lite \
-    -D CMAKE_CXX_STANDARD=17 && \
-    cmake --build . -j 20 && \
+    -D CMAKE_CXX_STANDARD=20 && \
+    cmake --build . -j 3 && \
     cmake --install .
