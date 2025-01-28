@@ -59,6 +59,7 @@ RUN cmake .. \
     -D BUILD_opencv_dnn=OFF \
     -D BUILD_opencv_ml=OFF \
     -D BUILD_opencv_gapi=OFF \
+    -D WITH_ADE=OFF \
     -D BUILD_opencv_flann=OFF \
     -D BUILD_opencv_features2d=ON \
     -D BUILD_opencv_calib3d=OFF \

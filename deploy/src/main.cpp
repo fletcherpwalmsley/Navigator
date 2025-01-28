@@ -68,14 +68,14 @@ int main(int argc, char* argv[]) {
   //     "appsrc ! videoconvert ! video/x-raw,format=I420 ! av1enc ! rtpav1pay ! rtspclientsink "
   //     "location=rtsp://localhost:8554/mystream";
 
-  cv::VideoWriter video(mediamtx_h264, cv::CAP_GSTREAMER, 10.0,
-                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
-
-  // cv::VideoWriter video("mask_video.h264", cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('H', '2', '6', '4'), 30,
+  // cv::VideoWriter video(mediamtx_h264, cv::CAP_GSTREAMER, 10.0,
   //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
 
+  cv::VideoWriter video("mask_video.h264", cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('H', '2', '6', '4'), 5,
+                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+
   VideoHandler handler(file_path, model_path);
-  handler.setFrameRate(20);
+  handler.setFrameRate(5);
   while (handler.isDataWaiting()) {
     video.write(handler.processFrame());
   }
