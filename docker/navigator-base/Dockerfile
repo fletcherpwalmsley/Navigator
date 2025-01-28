@@ -52,7 +52,7 @@ RUN cmake .. \
     -D WITH_OPENCL=OFF \
     -D WITH_ANDROID_MEDIANDK=OFF \
     -D BUILD_JAVA=OFF \
-    -D WITH_JPEG=OFF \
+    -D WITH_JPEG=ON \
     -D WITH_WEBP=ON \
     -D BUILD_opencv_cnn_3dobj=OFF \
     -D BUILD_opencv_dnn=OFF \
