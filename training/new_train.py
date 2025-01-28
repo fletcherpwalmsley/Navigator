@@ -22,18 +22,18 @@ if __name__ == "__main__":
     image_paths = LoadData()
 
     # Define the desired shape
-    target_shape_img = [96, 96, 3]
-    target_shape_mask = [96, 96, 1]
+    target_shape_img = [256, 256, 3]
+    target_shape_mask = [256, 256, 1]
 
     # Process data using apt helper function
     X, y = PreprocessData(image_paths, target_shape_img, target_shape_mask)
 
     X_train, X_valid, y_train, y_valid = train_test_split(
-        X, y, test_size=0.1, random_state=123
+        X, y, test_size=0.01, random_state=123
     )
 
 
-    unet = UNetCompiled(input_size=(96, 96, 3), n_filters=32, n_classes=3)
+    unet = UNetCompiled(input_size=(256, 256, 3), n_filters=32, n_classes=3)
 
     # unet.summary()
 
@@ -43,37 +43,37 @@ if __name__ == "__main__":
         metrics=["accuracy"],
     )
 
-    checkpoint_path = "weights/96_96_GOOD.weights.h5"
+    checkpoint_path = "weights/heathcoat.weights.h5"
     # checkpoint_dir = os.path.dirname(checkpoint_path)
-    unet.load_weights(checkpoint_path)
+    # unet.load_weights(checkpoint_path)
 
     # Training check point create 
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_path, save_weights_only=True, verbose=1
     )
 
-    # results = unet.fit(
-    #     X_train,
-    #     y_train,
-    #     batch_size=64,
-    #     epochs=40,
-    #     validation_data=(X_valid, y_valid),
-    #     callbacks=[cp_callback],
-    # )
+    results = unet.fit(
+        X_train,
+        y_train,
+        batch_size=10,
+        epochs=30,
+        validation_data=(X_valid, y_valid),
+        callbacks=[cp_callback],
+    )
 
-    # unet.save("models.keras")
+    unet.save("models.keras")
     unet.export("savemodel")
 
-    # fig, axis = plt.subplots(1, 2, figsize=(20, 5))
-    # axis[0].plot(results.history["loss"], color="r", label="train loss")
-    # axis[0].plot(results.history["val_loss"], color="b", label="dev loss")
-    # axis[0].set_title("Loss Comparison")
-    # axis[0].legend()
-    # axis[1].plot(results.history["accuracy"], color="r", label="train accuracy")
-    # axis[1].plot(results.history["val_accuracy"], color="b", label="dev accuracy")
-    # axis[1].set_title("Accuracy Comparison")
-    # axis[1].legend()
-    # plt.show()
+    fig, axis = plt.subplots(1, 2, figsize=(20, 5))
+    axis[0].plot(results.history["loss"], color="r", label="train loss")
+    axis[0].plot(results.history["val_loss"], color="b", label="val loss")
+    axis[0].set_title("Loss Comparison")
+    axis[0].legend()
+    axis[1].plot(results.history["accuracy"], color="r", label="train accuracy")
+    axis[1].plot(results.history["val_accuracy"], color="b", label="val accuracy")
+    axis[1].set_title("Accuracy Comparison")
+    axis[1].legend()
+    plt.show()
 
     unet.evaluate(X_valid, y_valid)
 

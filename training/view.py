@@ -6,7 +6,7 @@ from tensorflow.keras.saving import load_model
 import matplotlib.pyplot as plt
 from tkinter import filedialog
 
-model = tf.keras.saving.load_model("C:\\Users\\fletc\\Projects\\Navigator\\training\\models.keras")
+model = tf.keras.saving.load_model("/home/FWALMSL/personal/Navigator/training/models.keras")
 
 # Need the get the dimensions from the saved model
 height   = model.layers[0].batch_shape[1]
@@ -15,8 +15,8 @@ channels = model.layers[0].batch_shape[3]
 print(model.layers[0].batch_shape)
 
 while (1):
-    image_path = "C:\\Users\\fletc\\Pictures\\CNN\\comb_exp_mask\\e5648316-39f9-11ef-b6c2-00155d3bf750\\img.png"
-    # image_path = filedialog.askopenfilename()
+    # image_path = "C:\\Users\\fletc\\Pictures\\CNN\\comb_exp_mask\\e5648316-39f9-11ef-b6c2-00155d3bf750\\img.png"
+    image_path = filedialog.askopenfilename()
     img = Image.open(image_path).convert("RGB")
     img = img.resize((height, width))
     img = np.reshape(img, (1, height, width, channels))

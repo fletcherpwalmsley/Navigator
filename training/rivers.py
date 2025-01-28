@@ -18,7 +18,7 @@ def LoadData():
     """
 
     # path = "C:\\Users\\fletc\\Pictures\\CNN\\rivers\\converted_mask"
-    path = "C:\\Users\\fletc\\Pictures\\CNN\\comb_exp_mask"
+    path = "/workspaces/Navigator/training/data"
     folder_list = os.listdir(path)
 
     images = []
@@ -85,7 +85,7 @@ def PreprocessData(image_paths, target_shape_img, target_shape_mask):
     # Pull the relevant dimensions for image and mask
     m = len(image_paths)  # number of images
     print(m)
-    aug = 3 # Number of augmented images to generate from one source image 
+    aug = 8 # Number of augmented images to generate from one source image 
     m = m + (aug * m)
     print(m)
     i_h, i_w, i_c = target_shape_img  # pull height, width, and channels of image

@@ -104,7 +104,7 @@ def DecoderMiniBlock(prev_layer_input, skip_layer_input, n_filters=32):
     return conv
 
 
-def UNetCompiled(input_size=(80, 80, 3), n_filters=32, n_classes=3):
+def UNetCompiled(input_size=(96, 96, 3), n_filters=32, n_classes=3):
     """
     Combine both encoder and decoder blocks according to the U-Net research paper
     Return the model as output
