@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
