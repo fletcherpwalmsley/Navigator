@@ -5,22 +5,21 @@ __pycache__/
 
 # C extensions
 *.so
+*.a
 
 # Distribution / packaging
 .Python
 build/
 
 # Environments
-.env
+*env
 *venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 .ssh
 
 # Don't check in the h5 artifact
 .weights.h5
 *.mp4
 *.avi
+
+# Training data
+*data
