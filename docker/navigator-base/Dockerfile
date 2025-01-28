@@ -44,6 +44,7 @@ RUN cmake .. \
     -D BUILD_SHARED_LIBS=OFF \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=OFF \
+    -D BUILD_TEST=OFF \
     -D OPENCV_DNN_OPENCL=OFF \
     -D BUILD_PROTOBUF=OFF \
     -D WITH_PROTOBUF=OFF \
