@@ -3,6 +3,17 @@
 cmake_minimum_required(VERSION 3.16)
 project(navigator C CXX)
 
+if(DEFINED ENV{ENABLE_WARNINGS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+#set(CMAKE_CXX_FLAGS_RELEASE "-g")
+
+
 # Include Tflite and OpenCV Items
 set(TENSORFLOW_SOURCE_DIR "/tensorflow/tensorflow_src" CACHE PATH
   "Directory that contains the TensorFlow project"
@@ -28,11 +39,6 @@ set(CMAKE_CXX_STANDARD 20)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#set(CMAKE_CXX_FLAGS_RELEASE "-g")
 
 add_executable(navigator
   main.cpp
