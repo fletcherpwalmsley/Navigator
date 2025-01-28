@@ -60,14 +60,14 @@ RUN cmake .. \
     -D BUILD_opencv_gapi=OFF \
     -D BUILD_opencv_flann=OFF \
     -D BUILD_opencv_features2d=ON \
-    -D BUILD_opencv_calib3d=ON \
+    -D BUILD_opencv_calib3d=OFF \
     -D BUILD_opencv_highgui=OFF \
     -D BUILD_opencv_imgcodecs=ON \
-    && make -j 20 && make install
+    && make -j$(($(nproc) - 1)) && make install
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
 RUN cmake ../tensorflow_src/tensorflow/lite \
     -D CMAKE_CXX_STANDARD=20 && \
-    cmake --build . -j 3 && \
+    cmake --build . -j$(($(nproc) - 1))  && \
     cmake --install .
