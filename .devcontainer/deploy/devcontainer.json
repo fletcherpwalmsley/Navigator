@@ -8,11 +8,12 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
-	"workspaceMount": "source=${localWorkspaceFolder},target=/Navigator,type=bind",
-	"workspaceFolder": "/Navigator",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/builder/Navigator,type=bind",
+	"workspaceFolder": "/home/builder/Navigator",
+	"remoteUser": "builder",
 	// Add SSH mount to allow git to work with the local SSH keys
 	"mounts": [
-		"type=bind,src=${localEnv:HOME}/.ssh,dst=/Navigator/.ssh"
+		"type=bind,src=${localEnv:HOME}/.ssh,dst=/home/builder/.ssh"
 	],
 	"customizations": {
 		"vscode": {
