@@ -53,17 +53,17 @@ RUN cmake .. \
     -D WITH_ANDROID_MEDIANDK=OFF \
     -D BUILD_JAVA=OFF \
     -D WITH_JPEG=OFF \
-    -D WITH_WEBP=OFF \
+    -D WITH_WEBP=ON \
     -D BUILD_opencv_cnn_3dobj=OFF \
     -D BUILD_opencv_dnn=OFF \
     -D BUILD_opencv_ml=OFF \
     -D BUILD_opencv_gapi=OFF \
     -D BUILD_opencv_flann=OFF \
-    -D BUILD_opencv_features2d=OFF \
-    -D BUILD_opencv_calib3d=OFF \
+    -D BUILD_opencv_features2d=ON \
+    -D BUILD_opencv_calib3d=ON \
     -D BUILD_opencv_highgui=OFF \
-    -D BUILD_opencv_imgcodecs=OFF \
-    && make -j 3 && make install
+    -D BUILD_opencv_imgcodecs=ON \
+    && make -j 20 && make install
 
 # Create build directory and make Tensorflow Lite
 WORKDIR /tensorflow/tflite_build
