@@ -13,6 +13,9 @@
 		"--gpus",
 		"all"
 	],
+	"containerEnv": {
+		"SHELL": "/bin/bash"
+	},
 	"remoteUser": "builder",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/home/builder/Navigator,type=bind",
 	"workspaceFolder": "/home/builder/Navigator",

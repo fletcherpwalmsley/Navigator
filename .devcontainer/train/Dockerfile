@@ -5,6 +5,9 @@ ARG gid=1000
 
 # Add a 'builder' user with the same uid/gid as the user running the container.
 # Setup up the builder home directory, and ensure the it has the correct ownership.
+
+ARG ps1="\[\033[0;32m\]\u@\h\[\033[m\]:\[\033[0;34m\]\w\[\033[m\]\[\033[0;36m\] \$(__git_ps1 "%s")\n\[\033[m\]$ "
+
 RUN groupadd -r -g ${gid} builder && \
     useradd -rM -g builder -u ${uid} builder && \
     mkdir -p /home/builder && \
@@ -15,5 +18,3 @@ RUN groupadd -r -g ${gid} builder && \
 
 WORKDIR /home/builder/Navigator
 USER builder
-
-ENTRYPOINT ["/bin/bash"]
