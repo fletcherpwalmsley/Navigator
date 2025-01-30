@@ -18,7 +18,7 @@ def LoadData():
     """
 
     # path = "C:\\Users\\fletc\\Pictures\\CNN\\rivers\\converted_mask"
-    path = "/home/builder/Navigator/training/data"
+    path = "data/"
     folder_list = os.listdir(path)
 
     images = []
