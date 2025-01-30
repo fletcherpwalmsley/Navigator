@@ -1,5 +1,11 @@
 FROM ghcr.io/fletcherpwalmsley/navigator-base:latest
 
+RUN apt-get update && apt-get install -y \
+    sudo \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG uid=1000
 ARG gid=1000
 
@@ -16,5 +22,6 @@ RUN groupadd -r -g ${gid} builder && \
     echo "PS1='${ps1}'" >> /home/builder/.bashrc && \
     chown -R builder:builder /home/builder
 
+RUN usermod -aG sudo builder
 WORKDIR /home/builder/Navigator
 USER builder
