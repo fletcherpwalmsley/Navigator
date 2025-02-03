@@ -16,10 +16,13 @@ build/
 *venv
 .ssh
 
-# Don't check in the h5 artifact
+# Don't check in training artifact
 .weights.h5
 *.mp4
 *.avi
+*.keras
+*.tflite
+*savemodel
 
 # Training data
 *data
