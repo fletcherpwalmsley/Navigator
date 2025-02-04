@@ -1,5 +1,4 @@
 #include "process_video.h"
-
 VideoHandler::VideoHandler(std::filesystem::path video_path, std::filesystem::path model_path) {
   m_cap.open(video_path);
   if (!m_cap.isOpened()) {
@@ -13,6 +12,7 @@ VideoHandler::VideoHandler(std::filesystem::path video_path, std::filesystem::pa
 
   std::shared_ptr<CNNRunner> runner = std::make_unique<TFliteRunner>(model_path);
   m_generator = std::make_unique<RiverMaskGenerator>(std::move(runner));
+  m_movingAverage = std::make_unique<WeightedMovingAverage>(0.1);
 }
 
 void VideoHandler::setFrameRate(size_t desiredFPS) {
@@ -52,7 +52,7 @@ cv::Mat VideoHandler::processFrame() {
 
   cv::resize(m_currentFrame, resizedFrame, mask.size(), cv::INTER_NEAREST);
   cv::cvtColor(resizedFrame, grayScaleFrame, cv::COLOR_BGR2GRAY);
-  cv::addWeighted(grayScaleFrame, 0.6, mask, 0.4, 0, outFrame);
+  cv::addWeighted(grayScaleFrame, 0.6, m_movingAverage->apply(mask), 0.4, 0, outFrame);
   m_numProcessedFrames++;
   if (m_skipFrames != 0) {
     std::cout << "Processed frame number " << m_numProcessedFrames << " of " << m_totalNumFrames / m_skipFrames << "\n";

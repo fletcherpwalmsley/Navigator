@@ -45,6 +45,7 @@ add_executable(navigator
   cnn_runner.cpp
   river_mask_generator.cpp
   process_video.cpp
+  weighted_moving_average.cpp
 )
 target_link_libraries(navigator
   tensorflow-lite

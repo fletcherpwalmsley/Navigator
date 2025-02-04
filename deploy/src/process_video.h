@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "river_mask_generator.h"
+#include "weighted_moving_average.hpp"
 
 class VideoHandler {
  public:
@@ -24,4 +25,5 @@ class VideoHandler {
   cv::Mat m_currentFrame;
 
   std::shared_ptr<RiverMaskGenerator> m_generator;
+  std::unique_ptr<WeightedMovingAverage> m_movingAverage;
 };
