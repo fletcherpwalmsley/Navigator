@@ -85,7 +85,7 @@ def PreprocessData(image_paths, target_shape_img, target_shape_mask):
     # Pull the relevant dimensions for image and mask
     m = len(image_paths)  # number of images
     print(m)
-    aug = 8 # Number of augmented images to generate from one source image 
+    aug = 6 # Number of augmented images to generate from one source image 
     m = m + (aug * m)
     print(m)
     i_h, i_w, i_c = target_shape_img  # pull height, width, and channels of image
