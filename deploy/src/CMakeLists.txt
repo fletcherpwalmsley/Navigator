@@ -3,15 +3,17 @@
 cmake_minimum_required(VERSION 3.16)
 project(navigator C CXX)
 
-if(DEFINED ENV{ENABLE_WARNINGS})
+# if(DEFINED ENV{ENABLE_WARNINGS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-endif()
+  message(STATUS "Enabled warnings")
+# else()
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+#   message(STATUS "ALL WARNINGS DISABLED!!")
+# endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#set(CMAKE_CXX_FLAGS_RELEASE "-g")
+# set(CMAKE_CXX_FLAGS_RELEASE "-g")
 
 
 # Include Tflite and OpenCV Items

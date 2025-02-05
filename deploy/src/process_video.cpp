@@ -22,24 +22,27 @@ void VideoHandler::setFrameRate(size_t desiredFPS) {
 }
 
 bool VideoHandler::isDataWaiting() {
-  size_t i = 0;
+  // size_t i = 0;
 
-  if (!m_cap.grab()) {
-    return false;
-  }
+  m_cap.read(m_currentFrame);
+  return m_cap.read(m_currentFrame);
+  // if (!m_cap.grab()) {
+  //   return false;
+  // }
 
-  if (m_numProcessedFrames >= (m_totalNumFrames / m_skipFrames)) {
-    return false;
-  }
+  // if (m_numProcessedFrames >= (m_totalNumFrames / m_skipFrames)) {
+  //   return false;
+  // }
 
-  while (i++ <= m_skipFrames) {
-    if (!m_cap.retrieve(m_currentFrame)) {
-      return false;
-    }
-  }
-  return m_cap.retrieve(m_currentFrame);
+  // while (i++ <= m_skipFrames) {
+  //   if (!m_cap.retrieve(m_currentFrame)) {
+  //     return false;
+  //   }
+  // }
+  // return m_cap.retrieve(m_currentFrame);
 }
 
+[[deprecated]]
 cv::Mat VideoHandler::processFrame() {
   cv::Mat colour_correct_image;
   cv::Mat resizedFrame;
