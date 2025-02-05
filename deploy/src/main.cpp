@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
       "location=rtsp://192.168.1.29:8554/river";
 
   VideoHandler handler(file_path, model_path);
-  cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 10,
+  cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 5,
                         cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
 
   handler.setFrameRate(30);

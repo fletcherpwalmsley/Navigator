@@ -26,5 +26,6 @@ RUN groupadd -r -g ${gid} builder && \
     chown -R builder:builder /home/builder
 
 RUN usermod -aG sudo builder
+RUN usermod -aG video builder
 WORKDIR /home/builder/Navigator
 USER builder

@@ -1,6 +1,8 @@
 #include "process_video.h"
 VideoHandler::VideoHandler(std::filesystem::path video_path, std::filesystem::path model_path) {
-  m_cap.open(video_path);
+  // m_cap.open(video_path);
+  m_cap.open(0);
+
   if (!m_cap.isOpened()) {
     std::cerr << "Error opening video file: " << video_path << std::endl;
   }
@@ -24,7 +26,7 @@ void VideoHandler::setFrameRate(size_t desiredFPS) {
 bool VideoHandler::isDataWaiting() {
   // size_t i = 0;
 
-  m_cap.read(m_currentFrame);
+  // m_cap.read(m_currentFrame);
   return m_cap.read(m_currentFrame);
   // if (!m_cap.grab()) {
   //   return false;
