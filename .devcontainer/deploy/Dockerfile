@@ -4,6 +4,8 @@ RUN apt-get update && apt-get install -y \
     sudo \
     git \
     curl \
+    gstreamer1.0-tools \
+    gstreamer1.0-libav \
     && rm -rf /var/lib/apt/lists/*
 
 ARG uid=1000

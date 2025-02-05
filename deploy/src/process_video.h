@@ -13,6 +13,10 @@ class VideoHandler {
   bool isDataWaiting();
   cv::Mat processFrame();
   void setFrameRate(size_t desiredFPS);
+  [[nodiscard]] auto getCurrentFrame() const -> const cv::Mat& { return m_currentFrame; }
+  [[nodiscard]] auto getFrameWidth() const -> int { return m_frame_width; }
+  [[nodiscard]] auto getFrameHeight() const -> int { return m_frame_height; }
+  [[nodiscard]] auto getFPS() const -> int { return m_fps; }
 
  private:
   cv::VideoCapture m_cap;

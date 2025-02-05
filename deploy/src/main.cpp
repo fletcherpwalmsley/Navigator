@@ -71,13 +71,15 @@ int main(int argc, char* argv[]) {
   // cv::VideoWriter video(mediamtx_h264, cv::CAP_GSTREAMER, 10.0,
   //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
 
-  cv::VideoWriter video("mask_video.h264", cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('H', '2', '6', '4'), 5,
-                        cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
-
   VideoHandler handler(file_path, model_path);
-  handler.setFrameRate(5);
+  cv::VideoWriter video("mask_video.avi", cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 1.0,
+                        cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
+
+  handler.setFrameRate(30);
+  int numProcessedFrames = 0;
   while (handler.isDataWaiting()) {
-    video.write(handler.processFrame());
+    std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
+    video.write(handler.getCurrentFrame());
   }
 
   // When everything done, release the video capture and write object
