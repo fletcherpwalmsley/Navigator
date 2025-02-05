@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   // Set the GST_DEBUG environment variable to a higher level (e.g., 3)
-  setenv("GST_DEBUG", "3", 1);
+  // setenv("GST_DEBUG", "3", 1);
   std::filesystem::path file_path = argv[1];
   // std::filesystem::path file_path = "../input_video.mp4";
   std::filesystem::path model_path = argv[2];
@@ -88,30 +88,14 @@ int main(int argc, char* argv[]) {
   // Default resolutions of the frame are obtained.The default resolutions are system dependent.
 
   // Setup mask network
-  std::string mediamtx_h264 =
-      "appsrc ! queue ! videoconvert ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast bitrate=600 "
-      "key-int-max=20 ! "
-      "video/x-h264,profile=baseline ! rtspclientsink location=rtsp://127.0.0.1:8554/mystream";
+  std::string video_file_save = "mask_video.avi";
 
-  std::string h264_2 =
-      "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! rtspclientsink "
-      "location=rtsp://localhost:8554/mystream";
-
-  std::string mediamtx_rtp =
-      "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! rtph264pay ! udpsink "
-      "host=127.0.0.1 port=5000 debug=true";
-
-  // AV1 requires gst-plugin-rs for rtpav1pay. But these need to be compiled from source
-  // If I think I need the savings that AV1 will provide, I can go this route
-  // std::string mediamtx_av1 =
-  //     "appsrc ! videoconvert ! video/x-raw,format=I420 ! av1enc ! rtpav1pay ! rtspclientsink "
-  //     "location=rtsp://localhost:8554/mystream";
-
-  // cv::VideoWriter video(mediamtx_h264, cv::CAP_GSTREAMER, 10.0,
-  //                       cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), false);
+  std::string mediamtx_rtsp =
+      "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=fast ! rtspclientsink "
+      "location=rtsp://192.168.1.29:8554/river";
 
   VideoHandler handler(file_path, model_path);
-  cv::VideoWriter video("mask_video.avi", cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 15,
+  cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 10,
                         cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
 
   handler.setFrameRate(30);
@@ -134,12 +118,11 @@ int main(int argc, char* argv[]) {
     std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
     inFrame = handler.getCurrentFrame();
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
-    mask = m_generator->GenerateMask(colourCorrectFrame);
+    // mask = m_generator->GenerateMask(colourCorrectFrame);
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
 
     cv::split(inFrame, inputFrameChannels);
-    inputFrameChannels.at(0) += scaledMask;
-    // interMaskChannels.at(0) = scaledMask;
+    inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
 
     // std::cerr << "colourMask type: " << getMatType(colourMask.type()) << std::endl;
