@@ -9,9 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/deploy/src/build/navigator",
-            "args": [],
+            "args": [
+                "../input_video.mp4",
+                "../../../training/model.tflite"
+            ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/deploy/src/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
