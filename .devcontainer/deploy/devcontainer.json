@@ -31,6 +31,7 @@
 	},
 	"runArgs": [
 		"--net",
-		"host"
+		"host",
+		"--privileged"
 	]
 }

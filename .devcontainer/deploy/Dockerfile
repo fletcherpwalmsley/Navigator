@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     gstreamer1.0-tools \
     gstreamer1.0-libav \
+    gstreamer1.0-plugins-ugly \
     && rm -rf /var/lib/apt/lists/*
 
 ARG uid=1000
