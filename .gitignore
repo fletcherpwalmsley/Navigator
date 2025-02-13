@@ -10,10 +10,11 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+*.whl
 
 # Environments
 *env
-*venv
+*venv*
 .ssh
 
 # Don't check in training artifact
@@ -23,6 +24,8 @@ build/
 *.keras
 *.tflite
 *savemodel
+*.hef
+*.har
 
 # Training data
 *data
