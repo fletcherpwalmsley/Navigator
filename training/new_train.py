@@ -1,8 +1,8 @@
 from core import *
 from rivers import LoadData, PreprocessData
-from keras.applications.resnet50 import ResNet50 # Really good
-from keras.applications.efficientnet import EfficientNetB0 # Pretty bad
-from keras.applications.mobilenet_v2 import MobileNetV2
+# from keras.applications.resnet50 import ResNet50 # Really good
+# from keras.applications.efficientnet import EfficientNetB0 # Pretty bad
+# from keras.applications.mobilenet_v2 import MobileNetV2
 from tensorflow.keras.layers import Conv2D, UpSampling2D, concatenate
 from tensorflow.keras.models import Model
 
