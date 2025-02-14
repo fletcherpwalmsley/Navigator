@@ -13,8 +13,8 @@
 #include <opencv2/core/mat.hpp>
 #include <utility>
 
-#include "cnn_runner.h"
-#include "helpers.h"
+#include "cnn_runner.hpp"
+#include "helpers.hpp"
 
 class RiverMaskGenerator {
  private:

@@ -9,9 +9,9 @@
 #include <string>
 #include <utility>
 
-#include "cnn_runner.h"
-#include "process_video.h"
-#include "river_mask_generator.h"
+#include "cnn_runner.hpp"
+#include "process_video.hpp"
+#include "river_mask_generator.hpp"
 
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};

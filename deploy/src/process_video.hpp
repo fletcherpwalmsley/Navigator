@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <opencv2/opencv.hpp>
 
-#include "river_mask_generator.h"
+#include "river_mask_generator.hpp"
 #include "weighted_moving_average.hpp"
 
 class VideoHandler {

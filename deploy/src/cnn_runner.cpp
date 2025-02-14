@@ -7,9 +7,9 @@
  *
  */
 
-#include "cnn_runner.h"
+#include "cnn_runner.hpp"
 
-#include "helpers.h"
+#include "helpers.hpp"
 #include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/optional_debug_tools.h"
