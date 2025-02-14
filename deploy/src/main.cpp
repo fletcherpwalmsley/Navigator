@@ -10,49 +10,12 @@
 #include <utility>
 
 #include "cnn_runner.hpp"
+#include "helpers.hpp"
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
 
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
-
-std::string getMatType(int type) {
-  std::string r, a;
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-  switch (depth) {
-    case CV_8U:
-      r = "8U";
-      break;
-    case CV_8S:
-      r = "8S";
-      break;
-    case CV_16U:
-      r = "16U";
-      break;
-    case CV_16S:
-      r = "16S";
-      break;
-    case CV_32S:
-      r = "32S";
-      break;
-    case CV_32F:
-      r = "32F";
-      break;
-    case CV_64F:
-      r = "64F";
-      break;
-    default:
-      r = "User";
-      break;
-  }
-
-  a = "C";
-  a += (chans + '0');
-
-  return r + a;
-}
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
@@ -125,9 +88,8 @@ int main(int argc, char* argv[]) {
     inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
 
-    // std::cerr << "colourMask type: " << getMatType(colourMask.type()) << std::endl;
-    // std::cerr << "inFrame type: " << getMatType(inFrame.type()) << std::endl;
-    // std::cerr << "outFrame type: " << getMatType(outFrame.type()) << std::endl;
+    std::cerr << "inFrame type: " << getMatType(inFrame.type()) << std::endl;
+    std::cerr << "outFrame type: " << getMatType(outFrame.type()) << std::endl;
     video.write(outFrame);
   }
 
