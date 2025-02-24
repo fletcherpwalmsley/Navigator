@@ -11,6 +11,7 @@
 
 #include "cnn_runner.hpp"
 #include "helpers.hpp"
+#include "mask_limit_finders.h"
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
 
@@ -72,24 +73,24 @@ int main(int argc, char* argv[]) {
   cv::Mat colourCorrectFrame;
   cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
   cv::Mat scaledMask(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC1);
-  // cv::Mat colourMask;
   cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
-
   while (handler.isDataWaiting()) {
     std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
     inFrame = handler.getCurrentFrame();
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
-    // mask = m_generator->GenerateMask(colourCorrectFrame);
+    mask = m_generator->GenerateMask(colourCorrectFrame);
+
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
 
     cv::split(inFrame, inputFrameChannels);
     inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
 
-    std::cerr << "inFrame type: " << getMatType(inFrame.type()) << std::endl;
-    std::cerr << "outFrame type: " << getMatType(outFrame.type()) << std::endl;
+    // std::cerr << "inFrame type: " << getMatType(inFrame.type()) << std::endl;
+    // std::cerr << "outFrame type: " << getMatType(outFrame.type()) << std::endl;
+    cv::circle(outFrame, findHighestPoint(scaledMask), 5, cv::Scalar(0, 255, 255), -1);
     video.write(outFrame);
   }
 

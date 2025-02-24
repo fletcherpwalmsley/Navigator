@@ -48,6 +48,7 @@ add_executable(navigator
   river_mask_generator.cpp
   process_video.cpp
   weighted_moving_average.cpp
+  mask_limit_finders.cpp
 )
 target_link_libraries(navigator
   tensorflow-lite
