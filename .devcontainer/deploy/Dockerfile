@@ -25,6 +25,7 @@ RUN groupadd -r -g ${gid} builder && \
     echo "PS1='${ps1}'" >> /home/builder/.bashrc && \
     chown -R builder:builder /home/builder
 
+RUN echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
 RUN usermod -aG sudo builder
 RUN usermod -aG video builder
 WORKDIR /home/builder/Navigator
