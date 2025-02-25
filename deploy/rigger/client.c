@@ -71,6 +71,39 @@ int main() {
     }
   }
 
+  send(sockfd, buffer, sizeof(buffer), 0);
+
+  n = recv(sockfd, buffer, sizeof(buffer), 0);
+
+  for (int i = 0; i < n; ++i) {
+    if (mavlink_parse_char(MAVLINK_COMM_0, buffer[i], &mavlink_message, &status) == 1) {
+      switch (mavlink_message.msgid) {
+        case MAVLINK_MSG_ID_HEARTBEAT:
+          mavlink_msg_heartbeat_decode(&mavlink_message, &heartbeat);
+          printf("Got heartbeat from ");
+          switch (heartbeat.autopilot) {
+            case MAV_AUTOPILOT_GENERIC:
+              printf("generic");
+              break;
+            case MAV_AUTOPILOT_ARDUPILOTMEGA:
+              printf("ArduPilot");
+              break;
+            case MAV_AUTOPILOT_PX4:
+              printf("PX4");
+              break;
+            default:
+              printf("other");
+              break;
+          }
+          printf(" autopilot\n");
+          break;
+        default:
+          printf("Unknown message\n");
+          break;
+      }
+    }
+  }
+
   close(sockfd);
   return 0;
 }

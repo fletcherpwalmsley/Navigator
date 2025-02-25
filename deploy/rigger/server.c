@@ -22,6 +22,26 @@ static int setnonblocking(int sockfd) {
   return 0;
 }
 
+/*
+ *  Send MAVLink Heartbeat to client
+ */
+void send_heartbeat(int client_fd) {
+  //
+  mavlink_message_t message;
+  uint8_t server_buffer[MAVLINK_MAX_PACKET_LEN];
+
+  const uint8_t system_id = 42;
+  const uint8_t base_mode = 0;
+  const uint8_t custom_mode = 0;
+  mavlink_msg_heartbeat_pack_chan(system_id, MAV_COMP_ID_PERIPHERAL, MAVLINK_COMM_0, &message, MAV_TYPE_GENERIC,
+                                  MAV_AUTOPILOT_GENERIC, base_mode, custom_mode, MAV_STATE_STANDBY);
+
+  const int mav_len = mavlink_msg_to_send_buffer(server_buffer, &message);
+
+  send(client_fd, server_buffer, mav_len, 0);
+  printf("Sent Mavlink Heartbeat.\n");
+}
+
 int main() {
   int server_fd, new_socket, epoll_fd, event_count, i;
   struct sockaddr_in address;
@@ -106,21 +126,7 @@ int main() {
           close(new_socket);
           continue;
         }
-
-        // Send MAVLink Heartbeat to new client
-        mavlink_message_t message;
-        uint8_t server_buffer[MAVLINK_MAX_PACKET_LEN];
-
-        const uint8_t system_id = 42;
-        const uint8_t base_mode = 0;
-        const uint8_t custom_mode = 0;
-        mavlink_msg_heartbeat_pack_chan(system_id, MAV_COMP_ID_PERIPHERAL, MAVLINK_COMM_0, &message, MAV_TYPE_GENERIC,
-                                        MAV_AUTOPILOT_GENERIC, base_mode, custom_mode, MAV_STATE_STANDBY);
-
-        const int mav_len = mavlink_msg_to_send_buffer(server_buffer, &message);
-
-        send(new_socket, server_buffer, mav_len, 0);
-        printf("Sent Mavlink Heartbeat.\n");
+        send_heartbeat(new_socket);
       } else {
         // Handle data from client
         int client_fd = events[i].data.fd;
@@ -144,6 +150,7 @@ int main() {
           //   close(client_fd);
           //   epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
           // }
+          send_heartbeat(client_fd);
         }
       }
     }
