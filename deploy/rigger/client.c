@@ -6,13 +6,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 14550
 #define BUFFER_SIZE 1024
 
 int main() {
   int sockfd;
   char buffer[BUFFER_SIZE];
-  char *message = "Hello, Server!";
   struct sockaddr_in servaddr;
 
   // Create socket
@@ -21,20 +20,23 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  printf("Socket created successfully\n");
   memset(&servaddr, 0, sizeof(servaddr));
 
   // Fill server information
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(PORT);
-  servaddr.sin_addr.s_addr = INADDR_ANY;
+  servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-  int n, len;
+  // Connect to server
+  if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    perror("Connection to server failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
+  printf("Connected to server\n");
 
-  sendto(sockfd, (const char *)message, strlen(message), MSG_CONFIRM, (const struct sockaddr *)&servaddr,
-         sizeof(servaddr));
-  printf("Message sent.\n");
-
-  n = recvfrom(sockfd, (char *)buffer, BUFFER_SIZE, MSG_WAITALL, (struct sockaddr *)&servaddr, &len);
+  ssize_t n = recv(sockfd, buffer, sizeof(buffer), 0);
 
   mavlink_message_t mavlink_message;
   mavlink_status_t status;

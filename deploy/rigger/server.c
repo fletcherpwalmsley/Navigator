@@ -4,26 +4,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 14550
 #define BUFFER_SIZE 1024
 
 int main() {
-  int sockfd;
+  int sockfd, new_socket;
   char client_buffer[BUFFER_SIZE];
   uint8_t server_buffer[MAVLINK_MAX_PACKET_LEN];
-  struct sockaddr_in servaddr, cliaddr;
+  struct sockaddr_in servaddr;
+  int addrlen = sizeof(servaddr);
   socklen_t len;
 
   // Create socket
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
   }
 
   memset(&servaddr, 0, sizeof(servaddr));
-  memset(&cliaddr, 0, sizeof(cliaddr));
 
   // Fill server information
   servaddr.sin_family = AF_INET;  // IPv4
@@ -36,14 +37,26 @@ int main() {
     close(sockfd);
     exit(EXIT_FAILURE);
   }
+  printf("Bind successful\n");
 
-  len = sizeof(cliaddr);  // len is value/result
+  // Listen for incoming connections
+  if (listen(sockfd, 3) < 0) {
+    perror("Listen failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
+  printf("Listening for connections...\n");
 
-  int n = recvfrom(sockfd, (char *)client_buffer, BUFFER_SIZE, MSG_WAITALL, (struct sockaddr *)&cliaddr, &len);
-  client_buffer[n] = '\0';
-  printf("Client : %s\n", client_buffer);
+  // Accept a connection
+  new_socket = accept(sockfd, (struct sockaddr *)&servaddr, (socklen_t *)&addrlen);
+  if (new_socket < 0) {
+    perror("Accept failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
+  printf("Connection accepted\n");
 
-  // MAVLink message
+  // Send MAVLink message
   mavlink_message_t message;
 
   const uint8_t system_id = 42;
@@ -54,7 +67,7 @@ int main() {
 
   const int mav_len = mavlink_msg_to_send_buffer(server_buffer, &message);
 
-  sendto(sockfd, server_buffer, mav_len, MSG_CONFIRM, (const struct sockaddr *)&cliaddr, len);
+  send(new_socket, server_buffer, mav_len, 0);
   printf("Sent Mavlink Heartbeat.\n");
 
   close(sockfd);
