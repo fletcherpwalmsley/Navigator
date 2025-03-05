@@ -26,6 +26,7 @@ build/
 *savemodel
 *.hef
 *.har
+*.log
 
 # Training data
 *data
