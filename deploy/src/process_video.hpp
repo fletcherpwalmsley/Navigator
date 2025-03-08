@@ -7,7 +7,7 @@
 
 class VideoHandler {
  public:
-  VideoHandler(std::filesystem::path video_path, std::filesystem::path model_path);
+  VideoHandler(std::filesystem::path video_path);
   ~VideoHandler() { m_cap.release(); }
 
   bool isDataWaiting();

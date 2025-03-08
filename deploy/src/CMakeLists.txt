@@ -15,26 +15,30 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # set(CMAKE_CXX_FLAGS_RELEASE "-g")
 
+# Option to use TensorFlow Lite
+option(USE_TFLITE "Use TensorFlow Lite" ON)
 
-# Include Tflite and OpenCV Items
-set(TENSORFLOW_SOURCE_DIR "/tensorflow/tensorflow_src" CACHE PATH
-  "Directory that contains the TensorFlow project"
-)
-if(NOT TENSORFLOW_SOURCE_DIR)
-  get_filename_component(TENSORFLOW_SOURCE_DIR
-    "${CMAKE_CURRENT_LIST_DIR}/../../../../"
-    ABSOLUTE
+if(USE_TFLITE)
+  # Include Tflite Items
+  set(TENSORFLOW_SOURCE_DIR "/tensorflow/tensorflow_src" CACHE PATH
+    "Directory that contains the TensorFlow project"
+  )
+  if(NOT TENSORFLOW_SOURCE_DIR)
+    get_filename_component(TENSORFLOW_SOURCE_DIR
+      "${CMAKE_CURRENT_LIST_DIR}/../../../../"
+      ABSOLUTE
+    )
+  endif()
+
+  add_subdirectory(
+    "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
+    "${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite"
+    EXCLUDE_FROM_ALL
   )
 endif()
 
 find_package(OpenCV REQUIRED)
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-
-add_subdirectory(
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
-  "${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite"
-  EXCLUDE_FROM_ALL
-)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -44,13 +48,20 @@ endif()
 
 add_executable(navigator
   main.cpp
-  cnn_runner.cpp
+  tflite_runner.cpp
   river_mask_generator.cpp
   process_video.cpp
   weighted_moving_average.cpp
   mask_limit_finders.cpp
 )
-target_link_libraries(navigator
-  tensorflow-lite
-  ${OpenCV_LIBS}
-)
+
+if(USE_TFLITE)
+  target_link_libraries(navigator
+    tensorflow-lite
+    ${OpenCV_LIBS}
+  )
+else()
+  target_link_libraries(navigator
+    ${OpenCV_LIBS}
+  )
+endif()

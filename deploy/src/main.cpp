@@ -9,11 +9,11 @@
 #include <string>
 #include <utility>
 
-#include "cnn_runner.hpp"
 #include "helpers.hpp"
 #include "mask_limit_finders.h"
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
+#include "tflite_runner.hpp"
 
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
       "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=fast ! rtspclientsink "
       "location=rtsp://192.168.1.29:8554/river";
 
-  VideoHandler handler(file_path, model_path);
+  VideoHandler handler(file_path);
   cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 5,
                         cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
 

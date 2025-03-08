@@ -7,7 +7,7 @@
  *
  */
 
-#include "cnn_runner.hpp"
+#include "tflite_runner.hpp"
 
 #include "helpers.hpp"
 #include "tensorflow/lite/core/interpreter_builder.h"
