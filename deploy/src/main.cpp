@@ -15,6 +15,7 @@
 #include "mask_limit_finders.h"
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
+#include "weighted_moving_average.hpp"
 
 #ifdef USE_TFLITE
 #include "tflite_runner.hpp"
@@ -85,15 +86,16 @@ int main(int argc, char* argv[]) {
   cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
+  WeightedMovingAverage wma(0.2);
+
   while (handler.isDataWaiting()) {
     std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
     inFrame = handler.getCurrentFrame();
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #ifdef USE_TFLITE
-    mask = m_generator->GenerateMask(colourCorrectFrame);
+    mask = wma.apply(m_generator->GenerateMask(colourCorrectFrame));
 #endif
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
-
     cv::split(inFrame, inputFrameChannels);
     inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
