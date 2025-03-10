@@ -6,23 +6,24 @@
 auto WeightedMovingAverage::apply(const cv::Mat& newFrame) -> cv::Mat {
   if (!initialized) {
     // Initialize the moving average with the first frame
-    newFrame.convertTo(movingAverage, CV_32F);
+    newFrame.convertTo(movingAverage, CV_8U);
     initialized = true;
   } else {
     // Update the moving average
     cv::Mat newFrameFloat;
-    newFrame.convertTo(newFrameFloat, CV_32F);
+    newFrame.convertTo(newFrameFloat, CV_8U);
     movingAverage = alpha * newFrameFloat + (1.0 - alpha) * movingAverage;
   }
 
-  // Convert the moving average back to the original type
-  cv::Mat non_thres_result;
-  cv::Mat result;
-  movingAverage.convertTo(non_thres_result, newFrame.type());
-
   // Apply high-pass filter
-  double beta = 250;
-  cv::threshold(non_thres_result, result, beta, 255, cv::THRESH_TOZERO);
+  double beta = 220;
+  cv::Mat threshold_result;
+  // std::cout << "movingAverage Value " << movingAverage << std::endl;
+  cv::threshold(movingAverage, threshold_result, beta, 255, cv::THRESH_TOZERO);
 
-  return result;
+  // Convert the moving average back to the original type
+  cv::Mat output_result;
+  threshold_result.convertTo(output_result, newFrame.type());
+
+  return output_result;
 }
