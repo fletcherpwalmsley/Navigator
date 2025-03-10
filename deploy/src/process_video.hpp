@@ -1,9 +1,7 @@
 #pragma once
 #include <filesystem>
+#include <iostream>
 #include <opencv2/opencv.hpp>
-
-#include "river_mask_generator.hpp"
-#include "weighted_moving_average.hpp"
 
 class VideoHandler {
  public:
@@ -27,7 +25,4 @@ class VideoHandler {
   size_t m_skipFrames{0};
   size_t m_numProcessedFrames{0};
   cv::Mat m_currentFrame;
-
-  std::shared_ptr<RiverMaskGenerator> m_generator;
-  std::unique_ptr<WeightedMovingAverage> m_movingAverage;
 };

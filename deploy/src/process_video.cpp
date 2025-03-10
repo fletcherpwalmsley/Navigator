@@ -11,8 +11,6 @@ VideoHandler::VideoHandler(std::filesystem::path video_path) {
   m_frame_height = m_cap.get(cv::CAP_PROP_FRAME_HEIGHT);
   m_totalNumFrames = m_cap.get(cv::CAP_PROP_FRAME_COUNT);
   m_fps = static_cast<int>(m_cap.get(cv::CAP_PROP_FPS));
-
-  m_movingAverage = std::make_unique<WeightedMovingAverage>(0.1);
 }
 
 void VideoHandler::setFrameRate(size_t desiredFPS) {
