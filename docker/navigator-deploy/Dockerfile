@@ -2,6 +2,8 @@
 FROM ghcr.io/fletcherpwalmsley/navigator-base:latest AS build
 
 # Compile navigator app
+RUN apt-get update && apt-get install -y \
+    curl
 COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
