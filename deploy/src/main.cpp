@@ -1,3 +1,5 @@
+#include <atomic>   // For atomic flag
+#include <csignal>  // For signal handling
 #include <cstdio>
 #include <cstdlib>  // For setenv
 #include <filesystem>
@@ -21,10 +23,33 @@
 #include "tflite_runner.hpp"
 #endif
 
+// Global variables for signal handling
+std::atomic<bool> running(true);
+cv::VideoWriter* global_video_ptr = nullptr;
+
+// Signal handler function
+void signalHandler(int signum) {
+  std::cout << "Interrupt signal (" << signum << ") received. Cleaning up resources..." << std::endl;
+  running = false;
+
+  // Release video if it exists
+  if (global_video_ptr != nullptr) {
+    global_video_ptr->release();
+    std::cout << "Video resources released." << std::endl;
+  }
+
+  // Exit after a short delay to allow cleanup
+  std::exit(signum);
+}
+
 const std::vector<std::string> videoTypes{".mp4", ".avi"};
 const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
 
 int main(int argc, char* argv[]) {
+  // Register signal handlers
+  std::signal(SIGINT, signalHandler);   // Handle Ctrl+C
+  std::signal(SIGTERM, signalHandler);  // Handle termination request
+
   if (argc != 3) {
     std::cerr << "Need video and model to process: navigator <video_path> <model_path>" << std::endl;
     return 1;
@@ -68,6 +93,9 @@ int main(int argc, char* argv[]) {
   cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
                         cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
 
+  // Store video writer pointer in global variable for signal handler
+  global_video_ptr = &video;
+
   handler.setFrameRate(30);
   int numProcessedFrames = 0;
 
@@ -86,9 +114,9 @@ int main(int argc, char* argv[]) {
   cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
-  WeightedMovingAverage wma(0.2);
+  WeightedMovingAverage wma(0.35);
 
-  while (handler.isDataWaiting()) {
+  while (handler.isDataWaiting() && running) {
     std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
     inFrame = handler.getCurrentFrame();
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
@@ -108,6 +136,7 @@ int main(int argc, char* argv[]) {
 
   // When everything done, release the video capture and write object
   video.release();
+  global_video_ptr = nullptr;  // Reset the pointer after releasing
 
   // Save the mask
   // cv::imwrite("mask.jpeg", mask);
