@@ -15,9 +15,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # set(CMAKE_CXX_FLAGS_RELEASE "-g")
 
-# Option to use TensorFlow Lite
-option(USE_TFLITE "Use TensorFlow Lite" ON)
+# Build options
+option(USE_TFLITE "Use TensorFlow Lite" OFF)
+option(USE_HAILO "Use Hailo" OFF)
 
+find_package(Threads)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -49,7 +51,7 @@ if(USE_TFLITE)
     EXCLUDE_FROM_ALL
   )
 
-  add_executable(navigator
+  add_executable(${PROJECT_NAME}
     main.cpp
     tflite_runner.cpp
     river_mask_generator.cpp
@@ -58,12 +60,34 @@ if(USE_TFLITE)
     mask_limit_finders.cpp
   )
 
-  target_link_libraries(navigator
+  target_link_libraries(${PROJECT_NAME}
     tensorflow-lite
     ${OpenCV_LIBS}
   )
+
+elseif(USE_HAILO)
+
+  add_definitions(-DUSE_HAILO)
+  find_package(HailoRT REQUIRED)
+  add_executable(${PROJECT_NAME}
+    main.cpp
+    river_mask_generator.cpp
+    process_video.cpp
+    weighted_moving_average.cpp
+    mask_limit_finders.cpp
+    hailo_runner.cpp
+  )
+
+  # include_directories(/usr/include ./)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -O3)
+  target_link_libraries(${PROJECT_NAME}
+    ${OpenCV_LIBS}
+    HailoRT::libhailort
+    Threads::Threads
+  )
+
 else()
-  add_executable(navigator
+  add_executable(${PROJECT_NAME}
     main.cpp
     river_mask_generator.cpp
     process_video.cpp
@@ -71,7 +95,7 @@ else()
     mask_limit_finders.cpp
   )
 
-  target_link_libraries(navigator
+  target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
   )
 endif()

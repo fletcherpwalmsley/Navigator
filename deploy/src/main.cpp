@@ -23,6 +23,11 @@
 #include "tflite_runner.hpp"
 #endif
 
+#ifdef USE_HAILO
+#include "hailo_runner.hpp"
+#endif
+
+
 // Global variables for signal handling
 std::atomic<bool> running(true);
 cv::VideoWriter* global_video_ptr = nullptr;
@@ -50,16 +55,16 @@ int main(int argc, char* argv[]) {
   std::signal(SIGINT, signalHandler);   // Handle Ctrl+C
   std::signal(SIGTERM, signalHandler);  // Handle termination request
 
-  if (argc != 3) {
-    std::cerr << "Need video and model to process: navigator <video_path> <model_path>" << std::endl;
-    return 1;
-  }
+  // if (argc != 3) {
+  //   std::cerr << "Need video and model to process: navigator <video_path> <model_path>" << std::endl;
+  //   return 1;
+  // }
   // Set the GST_DEBUG environment variable to a higher level (e.g., 3)
   // setenv("GST_DEBUG", "3", 1);
-  std::filesystem::path file_path = argv[1];
-  // std::filesystem::path file_path = "../input_video.mp4";
-  std::filesystem::path model_path = argv[2];
-  // std::filesystem::path model_path = "model.tflite";
+  // std::filesystem::path file_path = argv[1];
+  std::filesystem::path file_path = "input_video.mp4";
+  // std::filesystem::path model_path = argv[2];
+  std::filesystem::path model_path = "model.hef";
 
   if (!file_path.has_extension()) {
     std::cerr << "Error: File path must have an extension" << std::endl;
@@ -105,6 +110,14 @@ int main(int argc, char* argv[]) {
   runner = std::make_unique<TFliteRunner>(model_path);
   m_generator = std::make_unique<RiverMaskGenerator>(runner);
   cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
+#elif USE_HAILO
+std::shared_ptr<RiverMaskGenerator> m_generator;
+std::shared_ptr<HailoRunner> runner;
+runner = std::make_unique<HailoRunner>(model_path);
+m_generator = std::make_unique<RiverMaskGenerator>(runner);
+// Dynamically doing this gets a segfault. Likely need to pass a value through the network first
+cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1); 
+// cv::Mat mask(cv::Size(64, 64), CV_8UC1);
 #else
   cv::Mat mask(cv::Size(64, 64), CV_8UC1);
 #endif
@@ -117,11 +130,13 @@ int main(int argc, char* argv[]) {
   WeightedMovingAverage wma(0.35);
 
   while (handler.isDataWaiting() && running) {
-    std::cout << "Processed frame number " << numProcessedFrames++ << "\n";
+    std::cout << "Processing frame number " << numProcessedFrames++ << "\n";
     inFrame = handler.getCurrentFrame();
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
-#ifdef USE_TFLITE
-    mask = wma.apply(m_generator->GenerateMask(colourCorrectFrame));
+#if defined(USE_TFLITE) || defined(USE_HAILO)
+    auto output_data = m_generator->GenerateMask(colourCorrectFrame);
+    std::cout << output_data << std::endl;
+    mask = wma.apply(output_data);
 #endif
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
     cv::split(inFrame, inputFrameChannels);

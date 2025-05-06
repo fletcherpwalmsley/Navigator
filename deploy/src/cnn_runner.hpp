@@ -22,4 +22,7 @@ class CNNRunner {
   virtual int GetOutputHeight() const = 0;
   virtual int GetOutputWidth() const = 0;
   virtual int GetNumOutputClasses() const = 0;
+
+  // Virtual destructor for proper cleanup in derived classes
+  virtual ~CNNRunner() = default;
 };
