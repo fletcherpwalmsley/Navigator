@@ -29,9 +29,9 @@
 			]
 		}
 	},
-	"runArgs": [
-		"--net",
-		"host",
-		"--privileged"
-	]
+	// "runArgs": [
+		// "--net",
+		// "host",
+		// "--privileged"
+	// ]
 }
