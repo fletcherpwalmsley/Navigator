@@ -8,8 +8,8 @@ COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
 RUN cmake -DUSE_TFLITE=OFF .. && make -j
-RUN curl -L -o /model.tar.gz\ 
-https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
+RUN curl -L -o /model.tar.gz \ 
+    https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
 RUN tar xf model.tar.gz
 
 
