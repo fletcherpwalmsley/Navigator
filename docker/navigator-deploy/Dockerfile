@@ -8,9 +8,10 @@ COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
 RUN cmake -DUSE_TFLITE=OFF .. && make -j
-RUN curl -L -o /model.tar.gz \ 
-    https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
-RUN tar xf model.tar.gz
+# No need to get the model, as TFlite is disabled
+# RUN curl -L -o /model.tar.gz \ 
+#     https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
+# RUN tar xf model.tar.gz
 
 
 # Create a slim container for deployment
@@ -24,7 +25,7 @@ RUN apt-get update && apt-get install -y \
     gstreamer1.0-rtsp \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/build/navigator /bin/navigator/
-COPY --from=build model.tar.gz /bin/navigator/model.tar.gz
+# COPY --from=build model.tar.gz /bin/navigator/model.tar.gz
 
 # Set the entrypoint to a shell to allow for interactive use, if needed
 ENTRYPOINT ["/bin/bash"]
