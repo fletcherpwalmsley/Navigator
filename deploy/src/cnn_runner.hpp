@@ -15,8 +15,8 @@
 
 class CNNRunner {
  public:
-  //virtual float* DoInference(cv::Mat input_mat) = 0;
-  virtual std::unique_ptr<std::vector<float32_t>> DoInference(cv::Mat input_mat) = 0;
+  // virtual float* DoInference(cv::Mat input_mat) = 0;
+  virtual std::unique_ptr<std::vector<float_t>> DoInference(cv::Mat input_mat) = 0;
   // For when you need to know what size your cv:Mat must be
   virtual cv::Size GetInputSize() const = 0;
   // For when you need to know what you're getting out
