@@ -62,9 +62,9 @@ int main(int argc, char* argv[]) {
   // Set the GST_DEBUG environment variable to a higher level (e.g., 3)
   // setenv("GST_DEBUG", "3", 1);
   // std::filesystem::path file_path = argv[1];
-  std::filesystem::path file_path = "input_video.mp4";
+  std::filesystem::path file_path = "../input_video.mp4";
   // std::filesystem::path model_path = argv[2];
-  std::filesystem::path model_path = "model.hef";
+  std::filesystem::path model_path = "../model.hef";
 
   if (!file_path.has_extension()) {
     std::cerr << "Error: File path must have an extension" << std::endl;
@@ -135,7 +135,7 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
-    std::cout << output_data << std::endl;
+    // std::cout << output_data << std::endl;
     mask = wma.apply(output_data);
 #endif
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);

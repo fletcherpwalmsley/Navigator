@@ -8,7 +8,7 @@
 class HailoRunner : public CNNRunner {
  public:
   HailoRunner(std::string model_path);
-  float* DoInference(cv::Mat input_mat);
+  std::unique_ptr<std::vector<float32_t>> DoInference(cv::Mat input_mat);
   cv::Size GetInputSize() const;
   int GetOutputHeight() const;
   int GetOutputWidth() const;

@@ -112,13 +112,12 @@ HailoRunner::HailoRunner(std::string filename) {
 
 }
 
-float*  HailoRunner::DoInference(cv::Mat frame) {
+std::unique_ptr<std::vector<float32_t>> HailoRunner::DoInference(cv::Mat frame) {
   int height = m_input_vstreams.front().get_info().shape.height;
   int width = m_input_vstreams.front().get_info().shape.width;
   if (frame.rows != height || frame.cols != width) {
     cv::resize(frame, frame, cv::Size(width, height), cv::INTER_AREA);
   }
-  frame.convertTo(frame, CV_32FC3, 1.0 / 255.0);
   // int factor = std::is_same<T, uint8_t>::value ? 1 : 4;  // In case we uread_allse float32_t, we have 4 bytes per component
   const int factor = 4;
   int channels = m_input_vstreams.front().get_info().shape.features;
@@ -135,7 +134,7 @@ float*  HailoRunner::DoInference(cv::Mat frame) {
     std::cerr << "-E- Failed to read from output stream " << read_status << std::endl;
     return nullptr;
   }
-  return m_data->data();
+  return std::move(m_data);
 }
 
 cv::Size HailoRunner::GetInputSize() const {
