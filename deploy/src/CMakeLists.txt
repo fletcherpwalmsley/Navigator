@@ -21,7 +21,10 @@ option(USE_HAILO "Use Hailo" OFF)
 
 find_package(Threads)
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBCAMERA REQUIRED libcamera)
+
+include_directories(${LIBCAMERA_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -84,6 +87,7 @@ elseif(USE_HAILO)
     ${OpenCV_LIBS}
     HailoRT::libhailort
     Threads::Threads
+    -llccv
   )
 
 else()

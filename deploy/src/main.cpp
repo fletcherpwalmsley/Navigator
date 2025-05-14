@@ -6,11 +6,17 @@
 #include <iostream>
 #include <memory>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/imgcodecs.hpp>
+
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <utility>
+
+// As of now, OpenCV doesn't support libcamera.
+// So use the LCCV library to bridge this gap.
+// The .so needs to be manually built and installed
+// See https://github.com/kbarni/LCCV
+#include <lccv.hpp>
 
 #include "cnn_runner.hpp"
 #include "helpers.hpp"
@@ -88,20 +94,38 @@ int main(int argc, char* argv[]) {
   // Default resolutions of the frame are obtained.The default resolutions are system dependent.
 
   // Setup mask network
+
+  // Set pi_cam
+  int32_t height = 216;
+  int32_t width = 384;
+  int32_t fps = 15;
+  cv::Mat inFrame(cv::Size(width, height), CV_8UC3);
+  cv::Mat scaledMask(cv::Size(width, height), CV_8UC1);
+  lccv::PiCamera pi_cam;
+  pi_cam.options->video_width=width;
+  pi_cam.options->video_height=height;
+  pi_cam.options->framerate=fps;
+  pi_cam.options->verbose=true;
+
+  pi_cam.startVideo();
+
   std::string video_file_save = "mask_video.avi";
 
   std::string mediamtx_rtsp =
-      "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=fast ! rtspclientsink "
-      "location=rtsp://192.168.1.29:8554/river";
+      "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=medium byte-stream=false "
+      "key-int-max=20 bframes=0 aud=true ! rtspclientsink "
+      "location=rtsp://localhost:8554/river";
 
-  VideoHandler handler(file_path);
-  cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
-                        cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
+  // VideoHandler handler(file_path);
+  // cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
+  //                       cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
+    cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps,
+                            cv::Size(cv::Size(width, height)), true);
 
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
 
-  handler.setFrameRate(30);
+  // handler.setFrameRate(30);
   int numProcessedFrames = 0;
 
 #ifdef USE_TFLITE
@@ -123,15 +147,17 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
 #endif
 
   cv::Mat colourCorrectFrame;
-  cv::Mat scaledMask(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC1);
-  cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
+  // cv::Mat scaledMask(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC1);
+  //cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
   WeightedMovingAverage wma(0.35);
 
-  while (handler.isDataWaiting() && running) {
+  // while (handler.isDataWaiting() && running) {
+  while (running) {
     std::cout << "Processing frame number " << numProcessedFrames++ << "\n";
-    inFrame = handler.getCurrentFrame();
+    // inFrame = handler.getCurrentFrame();
+    pi_cam.getVideoFrame(inFrame,10000);
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
@@ -150,7 +176,8 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
   }
 
   // When everything done, release the video capture and write object
-  video.release();
+  // video.release();
+  pi_cam.stopVideo();
   global_video_ptr = nullptr;  // Reset the pointer after releasing
 
   // Save the mask
