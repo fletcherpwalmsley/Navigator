@@ -18,13 +18,20 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Build options
 option(USE_TFLITE "Use TensorFlow Lite" OFF)
 option(USE_HAILO "Use Hailo" OFF)
+option(USE_LIBCAMERA "Use libcamera" OFF)
 
 find_package(Threads)
 find_package(OpenCV REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBCAMERA REQUIRED libcamera)
 
-include_directories(${LIBCAMERA_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+if(USE_LIBCAMERA)
+  pkg_check_modules(LIBCAMERA REQUIRED libcamera)
+  add_definitions(-DUSE_LIBCAMERA)
+  include_directories(${LIBCAMERA_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+else()
+  include_directories(${OpenCV_INCLUDE_DIRS})
+endif()
+
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -87,7 +94,9 @@ elseif(USE_HAILO)
     ${OpenCV_LIBS}
     HailoRT::libhailort
     Threads::Threads
+if(USE_LIBCAMERA)
     -llccv
+endif()
   )
 
 else()
