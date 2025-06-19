@@ -11,6 +11,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <utility>
+#include <chrono>
+#include <ctime>
 
 // As of now, OpenCV doesn't support libcamera.
 // So use the LCCV library to bridge this gap.
@@ -37,6 +39,7 @@
 // Global variables for signal handling
 std::atomic<bool> running(true);
 cv::VideoWriter* global_video_ptr = nullptr;
+cv::VideoWriter* global_video_ptr2 = nullptr;
 
 // Signal handler function
 void signalHandler(int signum) {
@@ -47,6 +50,12 @@ void signalHandler(int signum) {
   if (global_video_ptr != nullptr) {
     global_video_ptr->release();
     std::cout << "Video resources released." << std::endl;
+  }
+
+  // Release video if it exists
+  if (global_video_ptr2 != nullptr) {
+    global_video_ptr2->release();
+    std::cout << "Video2 resources released." << std::endl;
   }
 
   // Exit after a short delay to allow cleanup
@@ -96,8 +105,8 @@ int main(int argc, char* argv[]) {
   // Setup mask network
 
   // Set pi_cam
-  int32_t height = 216;
-  int32_t width = 384;
+  int32_t height = 432;
+  int32_t width = 768;
   int32_t fps = 15;
   cv::Mat inFrame(cv::Size(width, height), CV_8UC3);
   cv::Mat scaledMask(cv::Size(width, height), CV_8UC1);
@@ -109,7 +118,12 @@ int main(int argc, char* argv[]) {
 
   pi_cam.startVideo();
 
-  std::string video_file_save = "mask_video.avi";
+  // std::string video_file_save = "mask_video.avi";
+  std::string video_file_save = "/home/autoboat/autoboat_sailing_videos/";
+  video_file_save += uuid::generate_uuid_v4();
+  video_file_save += ".avi";
+
+  std::cout << video_file_save;
 
   std::string mediamtx_rtsp =
       "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=medium byte-stream=false "
@@ -117,13 +131,16 @@ int main(int argc, char* argv[]) {
       "location=rtsp://localhost:8554/river";
 
   // VideoHandler handler(file_path);
-  // cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
-  //                       cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
+    // cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
+    //                       cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
+  cv::VideoWriter video2(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps,
+                      cv::Size(cv::Size(width, height)), true);
     cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps,
                             cv::Size(cv::Size(width, height)), true);
 
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
+  global_video_ptr2 = &video2;
 
   // handler.setFrameRate(30);
   int numProcessedFrames = 0;
@@ -154,10 +171,12 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
   WeightedMovingAverage wma(0.35);
 
   // while (handler.isDataWaiting() && running) {
+  std::cout << "Starting video video\n";
   while (running) {
-    std::cout << "Processing frame number " << numProcessedFrames++ << "\n";
+    // std::cout << "Processing frame number " << numProcessedFrames++ << "\n";
     // inFrame = handler.getCurrentFrame();
     pi_cam.getVideoFrame(inFrame,10000);
+    video2.write(inFrame);
     cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
@@ -179,6 +198,7 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
   // video.release();
   pi_cam.stopVideo();
   global_video_ptr = nullptr;  // Reset the pointer after releasing
+  global_video_ptr2 = nullptr;  // Reset the pointer after releasing
 
   // Save the mask
   // cv::imwrite("mask.jpeg", mask);
