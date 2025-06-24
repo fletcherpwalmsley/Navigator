@@ -1,28 +1,34 @@
 #pragma once
 #include <filesystem>
-#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <lccv.hpp>
 
 class VideoHandler {
- public:
-  VideoHandler(std::filesystem::path video_path);
-  ~VideoHandler() { m_cap.release(); }
+public:
+  explicit VideoHandler(std::unique_ptr<lccv::PiCamera> pi_cam);
+  explicit VideoHandler(std::unique_ptr<cv::VideoCapture> cv_cap);
+  ~VideoHandler(); // Destructor
 
-  bool isDataWaiting();
-  cv::Mat processFrame();
-  void setFrameRate(size_t desiredFPS);
-  [[nodiscard]] auto getCurrentFrame() const -> const cv::Mat& { return m_currentFrame; }
+  // Delete copy constructor and copy assignment operator
+  VideoHandler(const VideoHandler&) = delete;
+  VideoHandler& operator=(const VideoHandler&) = delete;
+
+  // Delete move constructor and move assignment operator
+  VideoHandler(VideoHandler&&) = delete;
+  VideoHandler& operator=(VideoHandler&&) = delete;
+
   [[nodiscard]] auto getFrameWidth() const -> int { return m_frame_width; }
   [[nodiscard]] auto getFrameHeight() const -> int { return m_frame_height; }
   [[nodiscard]] auto getFPS() const -> int { return m_fps; }
 
- private:
-  cv::VideoCapture m_cap;
+  [[nodiscard]] std::pair<bool, const cv::Mat&> getNextFrame();
+
+private:
+  std::unique_ptr<cv::VideoCapture> m_cv_cap;
+  std::unique_ptr<lccv::PiCamera> m_pi_cam;
+  std::unique_ptr<cv::Mat> m_currentFrame;
   int m_frame_width{0};
   int m_frame_height{0};
-  int m_totalNumFrames{0};
-  int m_fps{0};
-  size_t m_skipFrames{0};
+  float m_fps{0};
   size_t m_numProcessedFrames{0};
-  cv::Mat m_currentFrame;
 };

@@ -62,63 +62,47 @@ void signalHandler(int signum) {
   std::exit(signum);
 }
 
-const std::vector<std::string> videoTypes{".mp4", ".avi"};
-const std::vector<std::string> imageTypes{".png", ".jpg", ".jpeg"};
 
 int main(int argc, char* argv[]) {
   // Register signal handlers
   std::signal(SIGINT, signalHandler);   // Handle Ctrl+C
   std::signal(SIGTERM, signalHandler);  // Handle termination request
 
-  // if (argc != 3) {
-  //   std::cerr << "Need video and model to process: navigator <video_path> <model_path>" << std::endl;
-  //   return 1;
-  // }
   // Set the GST_DEBUG environment variable to a higher level (e.g., 3)
   // setenv("GST_DEBUG", "3", 1);
-  // std::filesystem::path file_path = argv[1];
-  std::filesystem::path file_path = "../input_video.mp4";
-  // std::filesystem::path model_path = argv[2];
+
   std::filesystem::path model_path = "../model.hef";
 
-  if (!file_path.has_extension()) {
-    std::cerr << "Error: File path must have an extension" << std::endl;
-    return -1;
-  } else if (std::find(videoTypes.begin(), videoTypes.end(), file_path.extension()) == videoTypes.end()) {
-    std::cout << "File is of type " << file_path.extension() << " processing as a video \n";
-  } else if (std::find(imageTypes.begin(), imageTypes.end(), file_path.extension()) == imageTypes.end()) {
-    std::cout << "File is of type " << file_path.extension() << " processing as an image \n";
+  std::unique_ptr<VideoHandler> video_handler;
+
+  if (argc == 2) {
+    // If we are passed a file path, check that it is valid and use CV VideoCapture to open it
+    std::filesystem::path input_video_path = argv[1];
+    std::cout << input_video_path;
+    if (!input_video_path.has_extension() &&
+      (input_video_path.extension() == ".avi" || input_video_path.extension() == ".mp4")) {
+      std::cerr << "Error: Video file must be an avi or mp4" << std::endl;
+      return -1;
+    }
+    // If we didn't fail the above checks, we should be good to go!
+    auto video_capture = std::make_unique<cv::VideoCapture>(input_video_path);
+    video_handler = std::make_unique<VideoHandler>(std::move(video_capture));;
+
+  // Otherwise, use libcamera to open the default camera
   } else {
-    std::cerr << "Error: File type not supported" << std::endl;
-    return -1;
-  }
+    // Set pi_cam
+    int32_t height = 432;
+    int32_t width = 768;
+    float fps = 15;
 
-  // std::string image_filename = "image.png";
-  // cv::Mat import_image = cv::imread(image_filename, cv::IMREAD_COLOR);
-  // if (import_image.empty()) {
-  //   std::cerr << "Error: Could not open or find the image at " << image_filename << std::endl;
-  //   return -1;
-  // }
+    auto pi_cam = std::make_unique<lccv::PiCamera>();
+    pi_cam->options->video_width=width;
+    pi_cam->options->video_height=height;
+    pi_cam->options->framerate=fps;
+    pi_cam->options->verbose=true;
+    video_handler = std::make_unique<VideoHandler>(std::move(pi_cam));
+}
 
-  // Default resolutions of the frame are obtained.The default resolutions are system dependent.
-
-  // Setup mask network
-
-  // Set pi_cam
-  int32_t height = 432;
-  int32_t width = 768;
-  int32_t fps = 15;
-  cv::Mat inFrame(cv::Size(width, height), CV_8UC3);
-  cv::Mat scaledMask(cv::Size(width, height), CV_8UC1);
-  lccv::PiCamera pi_cam;
-  pi_cam.options->video_width=width;
-  pi_cam.options->video_height=height;
-  pi_cam.options->framerate=fps;
-  pi_cam.options->verbose=true;
-
-  pi_cam.startVideo();
-
-  // std::string video_file_save = "mask_video.avi";
   std::string video_file_save = "/home/autoboat/autoboat_sailing_videos/";
   video_file_save += uuid::generate_uuid_v4();
   video_file_save += ".avi";
@@ -130,20 +114,18 @@ int main(int argc, char* argv[]) {
       "key-int-max=20 bframes=0 aud=true ! rtspclientsink "
       "location=rtsp://localhost:8554/river";
 
-  // VideoHandler handler(file_path);
-    // cv::VideoWriter video(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), 30,
-    //                       cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), true);
-  cv::VideoWriter video2(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps,
-                      cv::Size(cv::Size(width, height)), true);
-    cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps,
-                            cv::Size(cv::Size(width, height)), true);
+  cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
+    video_handler->getFPS(), cv::Size(cv::Size(video_handler->getFrameWidth(),
+    video_handler->getFrameHeight())), true);
+
+  cv::VideoWriter video2(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
+    video_handler->getFPS(), cv::Size(cv::Size(video_handler->getFrameWidth(),
+    video_handler->getFrameHeight())), true);
+
 
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
   global_video_ptr2 = &video2;
-
-  // handler.setFrameRate(30);
-  int numProcessedFrames = 0;
 
 #ifdef USE_TFLITE
   std::shared_ptr<RiverMaskGenerator> m_generator;
@@ -157,50 +139,38 @@ std::shared_ptr<HailoRunner> runner;
 runner = std::make_unique<HailoRunner>(model_path);
 m_generator = std::make_unique<RiverMaskGenerator>(runner);
 // Dynamically doing this gets a segfault. Likely need to pass a value through the network first
-cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1); 
-// cv::Mat mask(cv::Size(64, 64), CV_8UC1);
+cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
 #else
   cv::Mat mask(cv::Size(64, 64), CV_8UC1);
 #endif
 
   cv::Mat colourCorrectFrame;
-  // cv::Mat scaledMask(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC1);
-  //cv::Mat inFrame(cv::Size(handler.getFrameWidth(), handler.getFrameHeight()), CV_8UC3);
+  cv::Mat scaledMask(cv::Size(video_handler->getFrameWidth(), video_handler->getFrameHeight()), CV_8UC1);
+
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
   WeightedMovingAverage wma(0.35);
 
-  // while (handler.isDataWaiting() && running) {
-  std::cout << "Starting video video\n";
+  std::cout << "Starting video loop\n";
   while (running) {
-    // std::cout << "Processing frame number " << numProcessedFrames++ << "\n";
-    // inFrame = handler.getCurrentFrame();
-    pi_cam.getVideoFrame(inFrame,10000);
-    video2.write(inFrame);
-    cv::cvtColor(inFrame, colourCorrectFrame, cv::COLOR_BGR2RGB);
+    auto inFrame = video_handler->getNextFrame();
+    video2.write(inFrame.second);
+    cv::cvtColor(inFrame.second, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
-    // std::cout << output_data << std::endl;
     mask = wma.apply(output_data);
 #endif
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
-    cv::split(inFrame, inputFrameChannels);
+    cv::split(inFrame.second, inputFrameChannels);
     inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
 
-    // std::cerr << "inFrame type: " << getMatType(inFrame.type()) << std::endl;
-    // std::cerr << "outFrame type: " << getMatType(outFrame.type()) << std::endl;
     cv::circle(outFrame, findHighestPoint(scaledMask), 5, cv::Scalar(0, 255, 255), -1);
     video.write(outFrame);
   }
 
-  // When everything done, release the video capture and write object
-  // video.release();
-  pi_cam.stopVideo();
   global_video_ptr = nullptr;  // Reset the pointer after releasing
   global_video_ptr2 = nullptr;  // Reset the pointer after releasing
 
-  // Save the mask
-  // cv::imwrite("mask.jpeg", mask);
   return 0;
 }
