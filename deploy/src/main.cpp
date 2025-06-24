@@ -158,6 +158,10 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
     cv::cvtColor(inFrame.second, colourCorrectFrame, cv::COLOR_BGR2RGB);
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
+    // Apply Closing morphology to the mask
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+    cv::morphologyEx(output_data, output_data, cv::MORPH_CLOSE, kernel);
+
     mask = wma.apply(output_data);
 #endif
     cv::resize(mask, scaledMask, scaledMask.size(), 0, 0, cv::INTER_LINEAR);
