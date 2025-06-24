@@ -1,15 +1,18 @@
 {
     "tasks": [
         {
-            "label": "Build with TFLite",
+            "label": "Minimal Build (No TFlite, Hailo, Libcamera)",
             "type": "shell",
             "command": "cmake",
             "args": [
-                "-DUSE_TFLITE=ON",
+                "-DUSE_TFLITE=OFF",
+                "-DUSE_HAILO=OFF",
+                "-DUSE_LIBCAMERA=OFF",
+                "-DCMAKE_BUILD_TYPE=Debug",
                 "-S",
                 "deploy/src/",
                 "-B",
-                "deploy/src/build-tflite"
+                "deploy/src/build-minimal"
             ],
             "group": {
                 "kind": "build",
@@ -18,7 +21,7 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build the project with TensorFlow Lite support"
+            "detail": "Build a minimal build without major external dependencies (except OpenCV)"
         },
         {
             "label": "Build without TFLite",

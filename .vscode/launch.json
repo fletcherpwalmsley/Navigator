@@ -5,39 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch - Navigator",
+            "name": "(gdb) Launch - Minimal Navigator",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/deploy/src/build/navigator",
+            "program": "${workspaceFolder}/deploy/src/build-minimal/navigator",
             "args": [
                 "../input_video.mp4",
-                "../../../training/model.tflite"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/deploy/src/build",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch - Rigger",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/deploy/rigger/build/rigger",
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/deploy/rigger/build",
+            "cwd": "${workspaceFolder}/deploy/src/build-minimal",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

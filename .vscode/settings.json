@@ -1,4 +1,5 @@
 {
+    "cmake.automaticReconfigure": false,
     "cmake.sourceDirectory": "${workspaceFolder}/deploy/src",
     "cmake.buildDirectory": "${workspaceFolder}/deploy/src/build",
     "C_mantic.headerGuard.style": "Add #pragma once",
@@ -88,5 +89,4 @@
         "variant": "cpp",
         "__nullptr": "cpp"
     },
-    "cmake.automaticReconfigure": false
 }
