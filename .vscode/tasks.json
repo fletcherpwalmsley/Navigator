@@ -1,7 +1,7 @@
 {
     "tasks": [
         {
-            "label": "Minimal Build (No TFlite, Hailo, Libcamera)",
+            "label": "Minimal Build (No TFlite, Hailo, Libcamera) - Debug",
             "type": "shell",
             "command": "cmake",
             "args": [
@@ -24,24 +24,50 @@
             "detail": "Build a minimal build without major external dependencies (except OpenCV)"
         },
         {
-            "label": "Build without TFLite",
+            "label": "Autoboat Build (No TFlite; Yes Hailo, Libcamera) - Debug",
             "type": "shell",
             "command": "cmake",
             "args": [
                 "-DUSE_TFLITE=OFF",
+                "-DUSE_HAILO=ON",
+                "-DUSE_LIBCAMERA=ON",
+                "-DCMAKE_BUILD_TYPE=Debug",
                 "-S",
                 "deploy/src/",
                 "-B",
-                "deploy/src/build-no-tflite"
+                "deploy/src/build-autoboat"
             ],
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build the project without TensorFlow Lite support"
+            "detail": "Build for release onto the Raspberry Pi 5 based Autoboat platform"
+        },
+        {
+            "label": "PC Build (Yes TFlite; No Hailo, Libcamera) - Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-DUSE_TFLITE=ON",
+                "-DUSE_HAILO=OFF",
+                "-DUSE_LIBCAMERA=OFF",
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-S",
+                "deploy/src/",
+                "-B",
+                "deploy/src/build-pc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build to run on a PC with no external hardware devices. Uses TFlite as the inference engine."
         }
     ],
     "version": "2.0.0"
