@@ -10,12 +10,14 @@
 #include <lccv.hpp>
 #endif
 
+#ifndef USE_LIBCAMERA
 struct Options {
   int video_width{768};
   int video_height{432};
   float framerate{15.0f};
   bool verbose{false};
 };
+#endif
 
 class LibCameraFacade {
  public:
@@ -25,8 +27,9 @@ class LibCameraFacade {
     if (!m_pi_cam) {
       throw std::runtime_error("Failed to initialize PiCamera");
     }
-#endif
+#else
     options = std::make_unique<Options>();
+#endif
   };
   ~LibCameraFacade() {
 #ifdef USE_LIBCAMERA
@@ -57,6 +60,7 @@ class LibCameraFacade {
 #ifdef USE_LIBCAMERA
     if (m_pi_cam) {
       m_pi_cam->stopVideo();
+    }
 #endif
     };
 
@@ -71,14 +75,22 @@ class LibCameraFacade {
       return true;
     };
 
+private:
 #ifdef USE_LIBCAMERA
-    typedef decltype(m_pi_cam->options) options;
+  std::unique_ptr<lccv::PiCamera> m_pi_cam;
 #else
   std::unique_ptr<Options> options;
 #endif
 
-   private:
+public:
 #ifdef USE_LIBCAMERA
-    std::unique_ptr<lccv::PiCamera> m_pi_cam;
-#endif
+  auto getOptions() const -> Options* {
+    return m_pi_cam->options;
   };
+#else
+  auto getOptions() const -> Options* {
+    return options.get();
+  };
+#endif
+
+};

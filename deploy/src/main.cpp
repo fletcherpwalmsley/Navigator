@@ -88,10 +88,10 @@ int main(int argc, char* argv[]) {
     float fps = 15;
 
     auto pi_cam_facade = std::make_unique<LibCameraFacade>();
-    pi_cam_facade->options->video_width = width;
-    pi_cam_facade->options->video_height = height;
-    pi_cam_facade->options->framerate = fps;
-    pi_cam_facade->options->verbose = true;
+    pi_cam_facade->getOptions()->video_width = width;
+    pi_cam_facade->getOptions()->video_height = height;
+    pi_cam_facade->getOptions()->framerate = fps;
+    pi_cam_facade->getOptions()->verbose = true;
     video_handler = std::make_unique<VideoHandler>(std::move(pi_cam_facade));
   }
 

@@ -90,14 +90,18 @@ elseif(USE_HAILO)
 
   # include_directories(/usr/include ./)
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -O3)
-  target_link_libraries(${PROJECT_NAME}
+
+  set(LINK_LIBRARIES
     ${OpenCV_LIBS}
     HailoRT::libhailort
     Threads::Threads
-if(USE_LIBCAMERA)
-    -llccv
-endif()
   )
+  
+  if(USE_LIBCAMERA)
+    list(APPEND LINK_LIBRARIES -llccv)
+  endif()
+  
+  target_link_libraries(${PROJECT_NAME} ${LINK_LIBRARIES})
 
 else()
   add_executable(${PROJECT_NAME}

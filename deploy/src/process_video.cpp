@@ -8,9 +8,9 @@ VideoHandler::VideoHandler(std::unique_ptr<LibCameraFacade> pi_cam_facade) {
   if (!m_pi_cam) {
     std::cerr << "Failed to initialize pi camera" << std::endl;
   }
-  m_frame_width = m_pi_cam->options->video_width;
-  m_frame_height = m_pi_cam->options->video_height;
-  m_fps = m_pi_cam->options->video_height;
+  m_frame_width = m_pi_cam->getOptions()->video_width;
+  m_frame_height = m_pi_cam->getOptions()->video_height;
+  m_fps = m_pi_cam->getOptions()->video_height;
   m_currentFrame = std::make_unique<cv::Mat>(cv::Size(m_frame_width, m_frame_height), CV_8UC3);
   m_pi_cam->startVideo();
 }
