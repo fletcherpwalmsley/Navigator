@@ -1,13 +1,14 @@
 #pragma once
 #include <filesystem>
 #include <opencv2/opencv.hpp>
-#include <lccv.hpp>
+
+#include "libcamera_factory.hpp"
 
 class VideoHandler {
-public:
-  explicit VideoHandler(std::unique_ptr<lccv::PiCamera> pi_cam);
+ public:
+  explicit VideoHandler(std::unique_ptr<LibCameraFacade> pi_cam_facade);
   explicit VideoHandler(std::unique_ptr<cv::VideoCapture> cv_cap);
-  ~VideoHandler(); // Destructor
+  ~VideoHandler();  // Destructor
 
   // Delete copy constructor and copy assignment operator
   VideoHandler(const VideoHandler&) = delete;
@@ -23,9 +24,9 @@ public:
 
   [[nodiscard]] std::pair<bool, const cv::Mat&> getNextFrame();
 
-private:
+ private:
   std::unique_ptr<cv::VideoCapture> m_cv_cap;
-  std::unique_ptr<lccv::PiCamera> m_pi_cam;
+  std::unique_ptr<LibCameraFacade> m_pi_cam;
   std::unique_ptr<cv::Mat> m_currentFrame;
   int m_frame_width{0};
   int m_frame_height{0};

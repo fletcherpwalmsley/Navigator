@@ -1,27 +1,21 @@
-#include <atomic>   // For atomic flag
+#include <atomic>  // For atomic flag
+#include <chrono>
 #include <csignal>  // For signal handling
 #include <cstdio>
 #include <cstdlib>  // For setenv
+#include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <memory>
 #include <opencv2/core/mat.hpp>
-
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <utility>
-#include <chrono>
-#include <ctime>
-
-// As of now, OpenCV doesn't support libcamera.
-// So use the LCCV library to bridge this gap.
-// The .so needs to be manually built and installed
-// See https://github.com/kbarni/LCCV
-#include <lccv.hpp>
 
 #include "cnn_runner.hpp"
 #include "helpers.hpp"
+#include "libcamera_factory.hpp"
 #include "mask_limit_finders.h"
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
@@ -34,7 +28,6 @@
 #ifdef USE_HAILO
 #include "hailo_runner.hpp"
 #endif
-
 
 // Global variables for signal handling
 std::atomic<bool> running(true);
@@ -62,7 +55,6 @@ void signalHandler(int signum) {
   std::exit(signum);
 }
 
-
 int main(int argc, char* argv[]) {
   // Register signal handlers
   std::signal(SIGINT, signalHandler);   // Handle Ctrl+C
@@ -80,28 +72,28 @@ int main(int argc, char* argv[]) {
     std::filesystem::path input_video_path = argv[1];
     std::cout << input_video_path;
     if (!input_video_path.has_extension() &&
-      (input_video_path.extension() == ".avi" || input_video_path.extension() == ".mp4")) {
+        (input_video_path.extension() == ".avi" || input_video_path.extension() == ".mp4")) {
       std::cerr << "Error: Video file must be an avi or mp4" << std::endl;
       return -1;
     }
     // If we didn't fail the above checks, we should be good to go!
     auto video_capture = std::make_unique<cv::VideoCapture>(input_video_path);
-    video_handler = std::make_unique<VideoHandler>(std::move(video_capture));;
+    video_handler = std::make_unique<VideoHandler>(std::move(video_capture));
 
-  // Otherwise, use libcamera to open the default camera
+    // Otherwise, use libcamera to open the default camera
   } else {
     // Set pi_cam
     int32_t height = 432;
     int32_t width = 768;
     float fps = 15;
 
-    auto pi_cam = std::make_unique<lccv::PiCamera>();
-    pi_cam->options->video_width=width;
-    pi_cam->options->video_height=height;
-    pi_cam->options->framerate=fps;
-    pi_cam->options->verbose=true;
-    video_handler = std::make_unique<VideoHandler>(std::move(pi_cam));
-}
+    auto pi_cam_facade = std::make_unique<LibCameraFacade>();
+    pi_cam_facade->options->video_width = width;
+    pi_cam_facade->options->video_height = height;
+    pi_cam_facade->options->framerate = fps;
+    pi_cam_facade->options->verbose = true;
+    video_handler = std::make_unique<VideoHandler>(std::move(pi_cam_facade));
+  }
 
   std::string video_file_save = "/home/autoboat/autoboat_sailing_videos/";
   video_file_save += uuid::generate_uuid_v4();
@@ -115,13 +107,12 @@ int main(int argc, char* argv[]) {
       "location=rtsp://localhost:8554/river";
 
   cv::VideoWriter video(mediamtx_rtsp, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
-    video_handler->getFPS(), cv::Size(cv::Size(video_handler->getFrameWidth(),
-    video_handler->getFrameHeight())), true);
+                        video_handler->getFPS(),
+                        cv::Size(cv::Size(video_handler->getFrameWidth(), video_handler->getFrameHeight())), true);
 
   cv::VideoWriter video2(video_file_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
-    video_handler->getFPS(), cv::Size(cv::Size(video_handler->getFrameWidth(),
-    video_handler->getFrameHeight())), true);
-
+                         video_handler->getFPS(),
+                         cv::Size(cv::Size(video_handler->getFrameWidth(), video_handler->getFrameHeight())), true);
 
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
@@ -134,12 +125,12 @@ int main(int argc, char* argv[]) {
   m_generator = std::make_unique<RiverMaskGenerator>(runner);
   cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
 #elif USE_HAILO
-std::shared_ptr<RiverMaskGenerator> m_generator;
-std::shared_ptr<HailoRunner> runner;
-runner = std::make_unique<HailoRunner>(model_path);
-m_generator = std::make_unique<RiverMaskGenerator>(runner);
-// Dynamically doing this gets a segfault. Likely need to pass a value through the network first
-cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
+  std::shared_ptr<RiverMaskGenerator> m_generator;
+  std::shared_ptr<HailoRunner> runner;
+  runner = std::make_unique<HailoRunner>(model_path);
+  m_generator = std::make_unique<RiverMaskGenerator>(runner);
+  // Dynamically doing this gets a segfault. Likely need to pass a value through the network first
+  cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
 #else
   cv::Mat mask(cv::Size(64, 64), CV_8UC1);
 #endif
@@ -173,7 +164,7 @@ cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8
     video.write(outFrame);
   }
 
-  global_video_ptr = nullptr;  // Reset the pointer after releasing
+  global_video_ptr = nullptr;   // Reset the pointer after releasing
   global_video_ptr2 = nullptr;  // Reset the pointer after releasing
 
   return 0;

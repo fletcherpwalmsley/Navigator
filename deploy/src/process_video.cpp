@@ -1,7 +1,9 @@
 #include "process_video.hpp"
 
-VideoHandler::VideoHandler(std::unique_ptr<lccv::PiCamera> pi_cam) {
-  m_pi_cam = std::move(pi_cam);
+#include <iostream>
+
+VideoHandler::VideoHandler(std::unique_ptr<LibCameraFacade> pi_cam_facade) {
+  m_pi_cam = std::move(pi_cam_facade);
 
   if (!m_pi_cam) {
     std::cerr << "Failed to initialize pi camera" << std::endl;
@@ -13,7 +15,6 @@ VideoHandler::VideoHandler(std::unique_ptr<lccv::PiCamera> pi_cam) {
   m_pi_cam->startVideo();
 }
 
-
 VideoHandler::VideoHandler(std::unique_ptr<cv::VideoCapture> cv_cap) {
   m_cv_cap = std::move(cv_cap);
 
@@ -22,7 +23,7 @@ VideoHandler::VideoHandler(std::unique_ptr<cv::VideoCapture> cv_cap) {
   }
 
   if (!m_cv_cap->isOpened()) {
-    std::cerr << "Error opening CV VideoCapture file: "<< std::endl;
+    std::cerr << "Error opening CV VideoCapture file: " << std::endl;
   }
 
   m_frame_width = m_cv_cap->get(cv::CAP_PROP_FRAME_WIDTH);
@@ -41,8 +42,7 @@ VideoHandler::~VideoHandler() {
 }
 
 std::pair<bool, const cv::Mat&> VideoHandler::getNextFrame() {
-
- // If we have a video file object, get the frames from that
+  // If we have a video file object, get the frames from that
   if (m_cv_cap) {
     if (m_cv_cap->read(*m_currentFrame)) {
       return {true, *m_currentFrame};
@@ -54,7 +54,7 @@ std::pair<bool, const cv::Mat&> VideoHandler::getNextFrame() {
 
   // Otherwise, get it from the pi camera
   if (m_pi_cam) {
-    if (m_pi_cam->getVideoFrame(*m_currentFrame,1000)) {
+    if (m_pi_cam->getVideoFrame(*m_currentFrame, 1000)) {
       return {true, *m_currentFrame};
     } else {
       std::cout << "Error retrieving frame from PiCamera" << std::endl;
