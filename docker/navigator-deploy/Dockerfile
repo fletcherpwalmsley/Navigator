@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
 COPY deploy/src /app/
 RUN mkdir /app/build
 WORKDIR /app/build
-RUN cmake -DUSE_TFLITE=ON -DUSE_HAILO=OFF -DUSE_LIBCAMERA=OFF -DCMAKE_BUILD_TYPE=Release .. && make -2
+RUN cmake -DUSE_TFLITE=ON -DUSE_HAILO=OFF -DUSE_LIBCAMERA=OFF -DCMAKE_BUILD_TYPE=Release .. && make -j 2
 # No need to get the model, as TFlite is disabled
 RUN curl -L -o /model.tar.gz \ 
     https://www.kaggle.com/api/v1/models/fletcherpw/river-segment/tfLite/default/2/download
