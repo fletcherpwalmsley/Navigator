@@ -38,7 +38,7 @@ TFliteRunner::TFliteRunner(std::string filename) {
   }
 }
 
-float* TFliteRunner::DoInference(cv::Mat input_mat) {
+std::unique_ptr<std::vector<float32_t>> TFliteRunner::DoInference(cv::Mat input_mat) {
   std::memcpy(m_interpreter->typed_input_tensor<float>(0), input_mat.ptr<float>(0),
               input_mat.total() * input_mat.elemSize());
   NULL_CHECK(m_interpreter != nullptr);
@@ -52,7 +52,13 @@ float* TFliteRunner::DoInference(cv::Mat input_mat) {
     std::cerr << "Error: Expected output tensor to be of type float32!" << std::endl;
     exit(1);
   }
-  return output_tensor->data.f;
+
+  // The Halio oriented interface expects a vector of floats.
+  // TfLite is only used for testing, so performance is not a concern.
+  size_t output_size = GetOutputHeight() * GetOutputWidth() * GetNumOutputClasses();
+
+  // Create a vector and copy the data
+  auto result = std::make_unique<std::vector<float32_t>>(output_tensor->data.f, output_tensor->data.f + output_size);
 }
 
 cv::Size TFliteRunner::GetInputSize() const {
