@@ -89,7 +89,7 @@ elseif(USE_HAILO)
   )
 
   # include_directories(/usr/include ./)
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -O3)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -g)
 
   set(LINK_LIBRARIES
     ${OpenCV_LIBS}

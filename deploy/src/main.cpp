@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
   std::filesystem::path model_path = "../model.hef";
 
   std::unique_ptr<VideoHandler> video_handler;
-
+  std::string video_file_save;
   if (argc == 2) {
     // If we are passed a file path, check that it is valid and use CV VideoCapture to open it
     std::filesystem::path input_video_path = argv[1];
@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
     // If we didn't fail the above checks, we should be good to go!
     auto video_capture = std::make_unique<cv::VideoCapture>(input_video_path);
     video_handler = std::make_unique<VideoHandler>(std::move(video_capture));
+    video_file_save = "/tmp/";
 
     // Otherwise, use libcamera to open the default camera
   } else {
@@ -93,9 +94,10 @@ int main(int argc, char* argv[]) {
     pi_cam_facade->getOptions()->framerate = fps;
     pi_cam_facade->getOptions()->verbose = true;
     video_handler = std::make_unique<VideoHandler>(std::move(pi_cam_facade));
+    video_file_save = "/home/autoboat/autoboat_sailing_videos/";
   }
 
-  std::string video_file_save = "/home/autoboat/autoboat_sailing_videos/";
+
   video_file_save += uuid::generate_uuid_v4();
   video_file_save += ".avi";
 
@@ -159,7 +161,16 @@ int main(int argc, char* argv[]) {
     cv::split(inFrame.second, inputFrameChannels);
     inputFrameChannels.at(2) += scaledMask;
     cv::merge(inputFrameChannels, outFrame);
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(scaledMask, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
+    cv::RNG rng(12345);
+    for( size_t i = 0; i< contours.size(); i++ )
+    {
+      cv::Scalar color = cv::Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+      cv::drawContours( outFrame, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0 );
+    }
     cv::circle(outFrame, findHighestPoint(scaledMask), 5, cv::Scalar(0, 255, 255), -1);
     video.write(outFrame);
   }
