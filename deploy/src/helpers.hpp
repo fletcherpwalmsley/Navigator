@@ -13,6 +13,7 @@
 #include <string>
 #include <random>
 #include <sstream>
+#include <cmath>
 /**
  * @brief null check macro taken from
  * tensorflow/lite/examples/minimal/minimal.cc
@@ -61,6 +62,13 @@ const inline std::string getMatType(int type) {
 
   return r + a;
 }
+
+inline float roundUp(float value, int decimals)
+{
+  float factor = std::pow(10.0f, decimals);
+  return std::ceil(value * factor) / factor;
+}
+
 
 namespace uuid {
 static std::random_device              rd;

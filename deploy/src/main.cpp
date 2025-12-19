@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
 
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
-  WeightedMovingAverage wma(0.35);
+  WeightedMovingAverage wma(0.15);
 
   std::cout << "Starting video loop\n";
   while (running) {
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
     // Apply Closing morphology to the mask
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
     cv::morphologyEx(output_data, output_data, cv::MORPH_CLOSE, kernel);
 
     mask = wma.apply(output_data);
@@ -165,13 +165,41 @@ int main(int argc, char* argv[]) {
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(scaledMask, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
-    cv::RNG rng(12345);
-    for( size_t i = 0; i< contours.size(); i++ )
-    {
-      cv::Scalar color = cv::Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
-      cv::drawContours( outFrame, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0 );
+    // Find the largest contour by area
+    int largestContourIndex = -1;
+    double largestArea = 0.0;
+    for (size_t i = 0; i < contours.size(); i++) {
+        double area = cv::contourArea(contours[i]);
+        if (area > largestArea) {
+            largestArea = area;
+            largestContourIndex = static_cast<int>(i);
+        }
     }
-    cv::circle(outFrame, findHighestPoint(scaledMask), 5, cv::Scalar(0, 255, 255), -1);
+    // Draw only the largest contour if one was found
+    if (largestContourIndex >= 0) {
+        cv::Scalar color = cv::Scalar(255, 0, 255);
+        cv::drawContours(outFrame, contours, largestContourIndex, color, 2, cv::LINE_8, hierarchy, 0);
+        
+        // Find highest point on the largest contour instead of on the whole mask
+        cv::Point highestPoint(-1, -1);
+        if (!contours[largestContourIndex].empty()) {
+            highestPoint = contours[largestContourIndex][0];
+            for (const auto& point : contours[largestContourIndex]) {
+                if (point.y < highestPoint.y) {
+                    highestPoint = point;
+                }
+            }
+          float motor_scale_factor = roundUp((video_handler->getFrameWidth() / 255), 2);
+          cv::circle(outFrame, highestPoint, 5, cv::Scalar(0, 255, 255), -1);
+          cv::putText(outFrame, std::to_string(highestPoint.x), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0), 2);
+          cv::putText(outFrame, std::to_string(motor_scale_factor), cv::Point(50,100), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,255), 2);
+          cv::putText(outFrame, std::to_string(highestPoint.x/motor_scale_factor), cv::Point(50,150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+        }
+    } else {
+        // No contours found
+        cv::circle(outFrame, cv::Point(-1, -1), 5, cv::Scalar(0, 255, 255), -1);
+
+    }
     video.write(outFrame);
   }
 

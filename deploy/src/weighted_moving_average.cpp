@@ -16,7 +16,7 @@ auto WeightedMovingAverage::apply(const cv::Mat& newFrame) -> cv::Mat {
   }
 
   // Apply high-pass filter
-  double beta = 220;
+  double beta = 230;
   cv::Mat threshold_result;
   // std::cout << "movingAverage Value " << movingAverage << std::endl;
   cv::threshold(movingAverage, threshold_result, beta, 255, cv::THRESH_TOZERO);
