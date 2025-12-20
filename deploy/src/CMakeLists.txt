@@ -68,6 +68,8 @@ if(USE_TFLITE)
     process_video.cpp
     weighted_moving_average.cpp
     mask_limit_finders.cpp
+          webserver.cpp
+          webserver.h
   )
 
   target_link_libraries(${PROJECT_NAME}
@@ -86,6 +88,8 @@ elseif(USE_HAILO)
     weighted_moving_average.cpp
     mask_limit_finders.cpp
     hailo_runner.cpp
+          webserver.cpp
+          webserver.h
   )
 
   # include_directories(/usr/include ./)
@@ -110,6 +114,9 @@ else()
     process_video.cpp
     weighted_moving_average.cpp
     mask_limit_finders.cpp
+          external/crow_websvr.hpp
+          webserver.cpp
+          webserver.h
   )
 
   target_link_libraries(${PROJECT_NAME}

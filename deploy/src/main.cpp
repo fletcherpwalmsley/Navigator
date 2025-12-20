@@ -20,6 +20,7 @@
 #include "process_video.hpp"
 #include "river_mask_generator.hpp"
 #include "weighted_moving_average.hpp"
+#include "webserver.h"
 
 #ifdef USE_TFLITE
 #include "tflite_runner.hpp"
@@ -119,6 +120,11 @@ int main(int argc, char* argv[]) {
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
   global_video_ptr2 = &video2;
+
+
+ // Set-up webserver
+  start_webserver();
+
 
 #ifdef USE_TFLITE
   std::shared_ptr<RiverMaskGenerator> m_generator;

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>HMNZS Otorohanga Bridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            background: #2c2c2c;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .remote {
+            background: linear-gradient(#555, #333);
+            padding: 40px 60px;
+            border-radius: 25px;
+            box-shadow:
+                    inset 0 4px 6px rgba(255,255,255,0.2),
+                    inset 0 -4px 6px rgba(0,0,0,0.6),
+                    0 10px 25px rgba(0,0,0,0.7);
+            display: flex;
+            gap: 80px;
+        }
+
+        .btn {
+            width: 120px;
+            height: 120px;
+            min-width: 84px;
+            min-height: 84px;
+            border-radius: 20px;
+            background: linear-gradient(#d33, #900);
+            box-shadow:
+                    inset 0 6px 8px rgba(255,255,255,0.3),
+                    inset 0 -6px 8px rgba(0,0,0,0.5),
+                    0 8px 15px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.06s ease, box-shadow 0.12s ease, background 0.12s ease;
+            touch-action: none; /* prevents scrolling while pressing/dragging */
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow:
+                    inset 0 3px 4px rgba(255,255,255,0.2),
+                    inset 0 -3px 4px rgba(0,0,0,0.6),
+                    0 4px 8px rgba(0,0,0,0.8);
+        }
+
+        /* Stronger permanent pressed state that can be toggled from JS */
+        .btn.pressed {
+            transform: translateY(3px);
+            background: linear-gradient(#b22, #600);
+            box-shadow:
+                    inset 0 3px 8px rgba(0,0,0,0.6),
+                    inset 0 -3px 8px rgba(255,255,255,0.05),
+                    0 4px 8px rgba(0,0,0,0.85);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(255,255,255,0.9);
+            outline-offset: 6px;
+            border-radius: 20px;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-top: 25px solid transparent;
+            border-bottom: 25px solid transparent;
+        }
+
+        .left .arrow {
+            border-right: 40px solid #fff;
+        }
+
+        .right .arrow {
+            border-left: 40px solid #fff;
+        }
+
+
+        .control-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-rows .row {
+            display: flex;
+            gap: 60px;
+        }
+
+
+        /* WebRTC player styles (placed above the controls) */
+        .webrtc {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .webrtc-controls {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .webrtc-controls input[type="text"] {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            min-width: 140px;
+        }
+
+        .webrtc-controls button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            background: #2a8fef;
+            color: white;
+            cursor: pointer;
+        }
+
+        .webrtc-controls button[disabled] {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .webrtc-frame {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .webrtc-frame video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .webrtc-status {
+            color: #ddd;
+            font-size: 13px;
+        }
+
+        .slider {
+            width: 360px;
+            max-width: 90%;
+            text-align: center;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .slider input[type="range"] {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .switch-label-text {
+            font-size: 16px;
+        }
+
+        .switch {
+            position: relative;
+            width: 56px;
+            height: 30px;
+            display: inline-block;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .sliderToggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #777;
+            border-radius: 30px;
+            transition: background-color .2s;
+        }
+
+        .sliderToggle::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            top: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform .2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .switch input:checked + .sliderToggle {
+            background-color: #4caf50;
+        }
+
+        .switch input:checked + .sliderToggle::before {
+            transform: translateX(26px);
+        }
+
+        .btn.disabled {
+            opacity: 0.45;
+            transform: none;
+            pointer-events: none;
+        }
+
+        /* Bigger slider thumb for touch devices */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        @media (max-width: 480px) {
+            .remote {
+                padding: 20px;
+                gap: 20px;
+            }
+            .control-rows .row {
+                gap: 28px;
+            }
+            .btn {
+                width: 88px;
+                height: 88px;
+                min-width: 88px;
+                min-height: 88px;
+                border-radius: 16px;
+            }
+            .left .arrow, .right .arrow {
+                border-top: 20px solid transparent;
+                border-bottom: 20px solid transparent;
+            }
+            .left .arrow { border-right: 30px solid #fff; }
+            .right .arrow { border-left: 30px solid #fff; }
+            .slider {
+                width: 320px;
+                max-width: 95%;
+                font-size: 16px;
+            }
+
+            /* WebRTC mobile layout: stack controls, full-width inputs + buttons */
+            .webrtc {
+                max-width: 95%;
+                padding: 0 8px;
+            }
+            .webrtc-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            .webrtc-controls input[type="text"] {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            .webrtc-controls button {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+            }
+            .webrtc-frame {
+                aspect-ratio: 16/9;
+                width: 100%;
+                max-height: 40vh;
+            }
+            .webrtc-status {
+                font-size: 14px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="slider">
+    <label for="powerSlider">Duty: <span id="powerValue">100</span></label>
+    <input id="powerSlider" type="range" min="0" max="255" value="100" />
+</div>
+
+<div class="remote">
+    <div class="control-rows">
+        <div class="row top-row">
+            <div class="btn left" data-direction="left" data-action="forward" role="button" tabindex="0" aria-pressed="false" aria-label="Left forward">
+                <div class="arrow" aria-hidden="true"></div>
+            </div>
+            <div class="btn right" data-direction="right" data-action="forward" role="button" tabindex="0" aria-pressed="false" aria-label="Right forward">
+                <div class="arrow" aria-hidden="true"></div>
+            </div>
+        </div>
+        <div class="row bottom-row">
+            <div class="btn left" data-direction="left" data-action="backward" role="button" tabindex="0" aria-pressed="false" aria-label="Left backward">
+                <div class="arrow" aria-hidden="true"></div>
+            </div>
+            <div class="btn right" data-direction="right" data-action="backward" role="button" tabindex="0" aria-pressed="false" aria-label="Right backward">
+                <div class="arrow" aria-hidden="true"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="switch-row" role="group" aria-label="Navigator control">
+    <div class="switch-label-text">Navigator 🔭</div>
+    <label class="switch" aria-hidden="false">
+        <input id="navigatorToggle" type="checkbox" checked aria-checked="true" />
+        <span class="sliderToggle" aria-hidden="true"></span>
+    </label>
+</div>
+
+<script>
+    const DEBOUNCE_MS = 150;
+
+    const debounceTimers = {};
+    const activeStates = {};
+
+    function debounce(key, fn) {
+        if (debounceTimers[key]) return;
+        fn();
+        debounceTimers[key] = setTimeout(() => {
+            delete debounceTimers[key];
+        }, DEBOUNCE_MS);
+    }
+
+    function callRoute(path) {
+        fetch(path, { method: "GET" }).catch(err => console.error("call failed", err));
+    }
+
+    const powerSlider = document.getElementById('powerSlider');
+    const powerValue = document.getElementById('powerValue');
+
+    function getPowerValue() {
+        return powerSlider ? parseInt(powerSlider.value, 10) || 0 : 100;
+    }
+
+    if (powerSlider && powerValue) {
+        powerValue.textContent = powerSlider.value;
+        powerSlider.addEventListener('input', () => {
+            powerValue.textContent = powerSlider.value;
+        });
+    }
+
+    const navigatorToggle = document.getElementById('navigatorToggle');
+    // Switch shows whether the Navigator is ON. Controls are enabled only when Navigator is OFF.
+    let navigatorOn = navigatorToggle ? navigatorToggle.checked : true;
+    let navigatorEnabled = !navigatorOn;
+
+    function setNavigatorOn(on) {
+        const navOn = !!on;
+        navigatorEnabled = !navOn; // controls enabled when Navigator is off
+
+        document.querySelectorAll('.btn').forEach(b => {
+            b.classList.toggle('disabled', navOn);
+            b.setAttribute('aria-disabled', navOn.toString());
+        });
+
+        if (navOn) {
+            // when navigator is ON (controls disabled) release any active directions
+            const keys = Object.keys(Object.assign({}, activeStates));
+            keys.forEach(k => {
+                if (activeStates[k]) {
+                    const parts = k.split('-');
+                    const dir = parts[0];
+                    const action = parts.slice(1).join('-') || 'forward';
+                    handleRelease(dir, action);
+                }
+            });
+        }
+
+        if (navigatorToggle) navigatorToggle.setAttribute('aria-checked', navOn ? 'true' : 'false');
+    }
+
+    if (navigatorToggle) {
+        setNavigatorOn(navigatorToggle.checked);
+        navigatorToggle.addEventListener('change', (e) => {
+            setNavigatorOn(e.target.checked);
+            // call routes on toggle: /nav/on when checked, /nav/off when unchecked
+            callRoute(`/nav/${e.target.checked ? 'on' : 'off'}`);
+        });
+    }
+
+
+    function handlePress(direction, action) {
+        if (!navigatorEnabled) return;
+        const key = `${direction}-${action}`;
+        if (activeStates[key]) return;
+        activeStates[key] = true;
+
+        const btnEl = document.querySelector(`.btn[data-direction="${direction}"][data-action="${action}"]`);
+        if (btnEl) {
+            btnEl.classList.add('pressed');
+            btnEl.setAttribute('aria-pressed', 'true');
+        }
+
+        debounce(`press-${key}`, () => {
+            callRoute(`/${direction}/${action}/${getPowerValue()}`);
+        });
+    }
+
+    function handleRelease(direction, action) {
+        const key = `${direction}-${action}`;
+        if (!activeStates[key]) return;
+        activeStates[key] = false;
+
+        const btnEl = document.querySelector(`.btn[data-direction="${direction}"][data-action="${action}"]`);
+        if (btnEl) {
+            btnEl.classList.remove('pressed');
+            btnEl.setAttribute('aria-pressed', 'false');
+        }
+
+        debounce(`release-${key}`, () => {
+            callRoute(`/${direction}/${action}/0`);
+        });
+    }
+
+    document.querySelectorAll(".btn").forEach(btn => {
+        const direction = btn.dataset.direction;
+        const action = btn.dataset.action;
+
+        // Pointer events (unified mouse/touch/stylus)
+        btn.addEventListener("pointerdown", (e) => { e.preventDefault(); handlePress(direction, action); });
+        btn.addEventListener("pointerup", () => handleRelease(direction, action));
+        btn.addEventListener("pointercancel", () => handleRelease(direction, action));
+        btn.addEventListener("pointerleave", () => handleRelease(direction, action));
+
+        // Keyboard: Space / Enter
+        btn.addEventListener("keydown", (e) => {
+            if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+                e.preventDefault();
+                handlePress(direction, action);
+            }
+        });
+        btn.addEventListener("keyup", (e) => {
+            if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+                e.preventDefault();
+                handleRelease(direction, action);
+            }
+        });
+
+        // Legacy events as a fallback
+        btn.addEventListener("mousedown", () => handlePress(direction, action));
+        btn.addEventListener("mouseup", () => handleRelease(direction, action));
+        btn.addEventListener("touchstart", (e) => { e.preventDefault(); handlePress(direction, action); });
+        btn.addEventListener("touchend", () => handleRelease(direction, action));
+        btn.addEventListener("touchcancel", () => handleRelease(direction, action));
+    });
+</script>
+</body>
+</html>
