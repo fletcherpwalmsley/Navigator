@@ -69,7 +69,8 @@ if(USE_TFLITE)
     weighted_moving_average.cpp
     mask_limit_finders.cpp
           webserver.cpp
-          webserver.h
+          motor_driver.cpp
+          movement_controller.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}
@@ -89,7 +90,8 @@ elseif(USE_HAILO)
     mask_limit_finders.cpp
     hailo_runner.cpp
           webserver.cpp
-          webserver.h
+          motor_driver.cpp
+          movement_controller.cpp
   )
 
   # include_directories(/usr/include ./)
@@ -116,7 +118,8 @@ else()
     mask_limit_finders.cpp
           external/crow_websvr.hpp
           webserver.cpp
-          webserver.h
+          motor_driver.cpp
+          movement_controller.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}

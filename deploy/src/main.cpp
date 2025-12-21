@@ -21,6 +21,7 @@
 #include "river_mask_generator.hpp"
 #include "weighted_moving_average.hpp"
 #include "webserver.h"
+#include "movement_controller.h"
 
 #ifdef USE_TFLITE
 #include "tflite_runner.hpp"
@@ -34,6 +35,7 @@
 std::atomic<bool> running(true);
 cv::VideoWriter* global_video_ptr = nullptr;
 cv::VideoWriter* global_video_ptr2 = nullptr;
+std::shared_ptr<movement_controller> movement = nullptr;
 
 // Signal handler function
 void signalHandler(int signum) {
@@ -51,7 +53,7 @@ void signalHandler(int signum) {
     global_video_ptr2->release();
     std::cout << "Video2 resources released." << std::endl;
   }
-
+  movement->disable_motors();
   // Exit after a short delay to allow cleanup
   std::exit(signum);
 }
@@ -123,8 +125,9 @@ int main(int argc, char* argv[]) {
 
 
  // Set-up webserver
-  start_webserver();
-
+  movement = std::make_shared<movement_controller>();
+  movement->enable_motors();
+  auto _a = start_webserver(movement);
 
 #ifdef USE_TFLITE
   std::shared_ptr<RiverMaskGenerator> m_generator;
@@ -195,11 +198,13 @@ int main(int argc, char* argv[]) {
                     highestPoint = point;
                 }
             }
-          float motor_scale_factor = roundUp((video_handler->getFrameWidth() / 255), 2);
+          int motor_scale_factor = (video_handler->getFrameWidth() / 51);
           cv::circle(outFrame, highestPoint, 5, cv::Scalar(0, 255, 255), -1);
           cv::putText(outFrame, std::to_string(highestPoint.x), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0), 2);
           cv::putText(outFrame, std::to_string(motor_scale_factor), cv::Point(50,100), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,255), 2);
           cv::putText(outFrame, std::to_string(highestPoint.x/motor_scale_factor), cv::Point(50,150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+          movement->set_direction(int(highestPoint.x/motor_scale_factor));
+          movement->step_direction();
         }
     } else {
         // No contours found
@@ -209,6 +214,7 @@ int main(int argc, char* argv[]) {
     video.write(outFrame);
   }
 
+  movement->disable_motors();
   global_video_ptr = nullptr;   // Reset the pointer after releasing
   global_video_ptr2 = nullptr;  // Reset the pointer after releasing
 

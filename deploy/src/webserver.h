@@ -4,7 +4,9 @@
 
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
+#include "external/crow_websvr.hpp"
+#include "movement_controller.h"
 
-void start_webserver();
+std::future<void> start_webserver(std::shared_ptr<movement_controller> movement_controller_ptr);
 
 #endif //WEBSERVER_H
