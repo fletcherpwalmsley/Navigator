@@ -3,36 +3,38 @@
 //
 
 #include "movement_controller.h"
-
-#include <iostream>
-
 #include "motor_driver.h"
 
-
 movement_controller::movement_controller() {
-  pwm_driver = std::make_unique<PCA9685>(0x6f, false);
-  pwm_driver->setPWMFreq();
+  try {
+    pwm_driver = std::make_unique<PCA9685>(0x6f, false);
+    pwm_driver->setPWMFreq();
+  } catch (const std::runtime_error&) {
+    pwm_driver = nullptr;
+  }
 
   disable_motors();
 }
 
-void movement_controller::disable_motors()const{
-  pwm_driver->setPWM(pwm_left_pin, 0, 0);
-  pwm_driver->setPWM(pwm_right_pin, 0, 0);
-  pwm_driver->setPWM(in1_left_pin, 0, 4096);
-  pwm_driver->setPWM(in2_left_pin, 0, 4096);
-  pwm_driver->setPWM(in1_right_pin, 0, 4096);
-  pwm_driver->setPWM(in2_right_pin, 0, 4096);
+void movement_controller::disable_motors() const{
+  if (pwm_driver) {
+    pwm_driver->setPWM(pwm_left_pin, 0, 0);
+    pwm_driver->setPWM(pwm_right_pin, 0, 0);
+    pwm_driver->setPWM(in1_left_pin, 0, 4096);
+    pwm_driver->setPWM(in2_left_pin, 0, 4096);
+    pwm_driver->setPWM(in1_right_pin, 0, 4096);
+    pwm_driver->setPWM(in2_right_pin, 0, 4096);
+  }
 }
 
 
-void movement_controller::enable_motors()const{
-
-  pwm_driver->setPWM(in1_left_pin, 4096, 0);
-  pwm_driver->setPWM(in2_left_pin, 0, 4096);
-
-  pwm_driver->setPWM(in1_right_pin, 4096, 0);
-  pwm_driver->setPWM(in2_right_pin, 0, 4096);
+void movement_controller::enable_motors() const{
+  if (pwm_driver) {
+    pwm_driver->setPWM(in1_left_pin, 4096, 0);
+    pwm_driver->setPWM(in2_left_pin, 0, 4096);
+    pwm_driver->setPWM(in1_right_pin, 4096, 0);
+    pwm_driver->setPWM(in2_right_pin, 0, 4096);
+  }
 }
 
 void movement_controller::set_direction(int direction) {
@@ -44,6 +46,10 @@ void movement_controller::set_direction(int direction) {
 }
 
 void movement_controller::step_direction() {
+
+  if (pwm_driver == nullptr) {
+    return;
+  }
 
   if ( (target_value == current_value) || (auto_control == false)) {
       return;
@@ -98,88 +104,93 @@ void movement_controller::set_auto_control(int value) {
 }
 
 void movement_controller::forward(int motor, int pwm_value){
+  if (pwm_driver) {
+    if (last_direction != 1) {
+      pwm_driver->setPWM(in1_left_pin, 4096, 0);
+      pwm_driver->setPWM(in2_left_pin, 0, 4096);
 
-  if (last_direction != 1) {
-    pwm_driver->setPWM(in1_left_pin, 4096, 0);
-    pwm_driver->setPWM(in2_left_pin, 0, 4096);
+      pwm_driver->setPWM(in1_right_pin, 4096, 0);
+      pwm_driver->setPWM(in2_right_pin, 0, 4096);\
+      last_direction = 1;
 
-    pwm_driver->setPWM(in1_right_pin, 4096, 0);
-    pwm_driver->setPWM(in2_right_pin, 0, 4096);\
-    last_direction = 1;
-
-    if (motor == 0) {
-      current_left_pwm = 0;
+      if (motor == 0) {
+        current_left_pwm = 0;
+      }
+      if (motor == 1) {
+        current_right_pwm = 0;
+      }
     }
-    if (motor == 1) {
-      current_right_pwm = 0;
-    }
+    soft_step_motor(motor, pwm_value);
   }
-  soft_step_motor(motor, pwm_value);
 }
 
 
 void movement_controller::backward(int motor, int pwm_value){
-  if (last_direction != 2) {
-    pwm_driver->setPWM(in2_left_pin, 4096, 0);
-    pwm_driver->setPWM(in1_left_pin, 0, 4096);
+  if (pwm_driver) {
+    if (last_direction != 2) {
+      pwm_driver->setPWM(in2_left_pin, 4096, 0);
+      pwm_driver->setPWM(in1_left_pin, 0, 4096);
 
-    pwm_driver->setPWM(in2_right_pin, 4096, 0);
-    pwm_driver->setPWM(in1_right_pin, 0, 4096);
-    last_direction = 2;
+      pwm_driver->setPWM(in2_right_pin, 4096, 0);
+      pwm_driver->setPWM(in1_right_pin, 0, 4096);
+      last_direction = 2;
 
-    if (motor == 0) {
-      current_left_pwm = 0;
+      if (motor == 0) {
+        current_left_pwm = 0;
+      }
+      if (motor == 1) {
+        current_right_pwm = 0;
+      }
     }
-    if (motor == 1) {
-      current_right_pwm = 0;
-    }
+    soft_step_motor(motor, pwm_value);
   }
-  soft_step_motor(motor, pwm_value);
 }
 
 void movement_controller::soft_step_motor(int motor, int pwm_value) {
-  if (motor == 0) {
-    if (pwm_value > current_left_pwm) {
-      while (pwm_value > (current_left_pwm+=10)) {
-        if (current_left_pwm >= 254) {
-          current_left_pwm = 255;
-          break;
+  if (pwm_driver) {
+    if (motor == 0) {
+      if (pwm_value > current_left_pwm) {
+        while (pwm_value > (current_left_pwm+=10)) {
+          if (current_left_pwm >= 254) {
+            current_left_pwm = 255;
+            break;
+          }
+          pwm_driver->setPWM(pwm_left_pin, 0, current_left_pwm*16);
+          usleep(30);
         }
-        pwm_driver->setPWM(pwm_left_pin, 0, current_left_pwm*16);
-        usleep(30);
-      }
 
-    } else if (pwm_value < current_left_pwm) {
-      while (pwm_value < (current_left_pwm-=10)) {
-        if (current_left_pwm <= 1) {
-          current_left_pwm = 0;
-          break;
+      } else if (pwm_value < current_left_pwm) {
+        while (pwm_value < (current_left_pwm-=10)) {
+          if (current_left_pwm <= 1) {
+            current_left_pwm = 0;
+            break;
+          }
+          pwm_driver->setPWM(pwm_left_pin, 0, current_left_pwm*16);
+          usleep(30);
         }
-        pwm_driver->setPWM(pwm_left_pin, 0, current_left_pwm*16);
-        usleep(30);
       }
     }
-  }
 
-  else if (motor == 1) {
-    if (pwm_value > current_right_pwm) {
-      while (pwm_value > (current_right_pwm+=10)) {
-        if (current_right_pwm >= 254) {
-          current_right_pwm = 255;
-          break;
+    else if (motor == 1) {
+      if (pwm_value > current_right_pwm) {
+        while (pwm_value > (current_right_pwm+=10)) {
+          if (current_right_pwm >= 254) {
+            current_right_pwm = 255;
+            break;
+          }
+          pwm_driver->setPWM(pwm_right_pin, 0, current_right_pwm*16);
+          usleep(30);
         }
-        pwm_driver->setPWM(pwm_right_pin, 0, current_right_pwm*16);
-        usleep(30);
-      }
 
-    } else if (pwm_value < current_right_pwm) {
-      while (pwm_value < (current_right_pwm-=10)) {
-        if (current_right_pwm <= 1) {
-          current_right_pwm = 0;
-          break;
+      } else if (pwm_value < current_right_pwm) {
+        while (pwm_value < (current_right_pwm-=10)) {
+          if (current_right_pwm <= 1) {
+            current_right_pwm = 0;
+            break;
+          }
+          pwm_driver->setPWM(pwm_right_pin, 0, current_right_pwm*16);
+          usleep(30);
         }
-        pwm_driver->setPWM(pwm_right_pin, 0, current_right_pwm*16);
-        usleep(30);
       }
     }
   }

@@ -68,9 +68,9 @@ if(USE_TFLITE)
     process_video.cpp
     weighted_moving_average.cpp
     mask_limit_finders.cpp
-          webserver.cpp
-          motor_driver.cpp
-          movement_controller.cpp
+    webserver.cpp
+    motor_driver.cpp
+    movement_controller.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}
@@ -89,9 +89,9 @@ elseif(USE_HAILO)
     weighted_moving_average.cpp
     mask_limit_finders.cpp
     hailo_runner.cpp
-          webserver.cpp
-          motor_driver.cpp
-          movement_controller.cpp
+    motor_driver.cpp
+    webserver.cpp
+    movement_controller.cpp
   )
 
   # include_directories(/usr/include ./)
