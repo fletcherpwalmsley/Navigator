@@ -3,13 +3,17 @@
 //
 
 #include "movement_controller.h"
+
+#include <iostream>
+
 #include "motor_driver.h"
 
 movement_controller::movement_controller() {
   try {
     pwm_driver = std::make_unique<PCA9685>(0x6f, false);
     pwm_driver->setPWMFreq();
-  } catch (const std::runtime_error&) {
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Error initializing motor driver: " << e.what() << std::endl;
     pwm_driver = nullptr;
   }
 

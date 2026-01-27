@@ -97,17 +97,14 @@ HailoRunner::HailoRunner(std::string filename) {
   m_activated_network_group = std::move(activated_network_group_exp.value());
 
   // Print testing
-  std::cout << "-I---------------------------------------------------------------------" << std::endl;
-  std::cout << "-I- Dir  Name                                                          " << std::endl;
-  std::cout << "-I---------------------------------------------------------------------" << std::endl;
-  for (auto &value: m_input_vstreams){
-      std::cout << "-I- IN:  " << value.get_info().name << std::endl;
-  }
-  std::cout << "-I---------------------------------------------------------------------" << std::endl;
-  for (auto &value: m_output_vstreams){
-  std::cout << "-I- OUT: " << value.get_info().name << std::endl;
-  }
-  std::cout << "-I---------------------------------------------------------------------\n" << std::endl;
+  // for (auto &value: m_input_vstreams){
+  //     std::cout << "-I- IN:  " << value.get_info().name << std::endl;
+  // }
+  // std::cout << "-I---------------------------------------------------------------------" << std::endl;
+  // for (auto &value: m_output_vstreams){
+  // std::cout << "-I- OUT: " << value.get_info().name << std::endl;
+  // }
+  // std::cout << "-I---------------------------------------------------------------------\n" << std::endl;
 
 
 }

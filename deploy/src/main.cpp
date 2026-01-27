@@ -35,6 +35,7 @@
 std::atomic<bool> running(true);
 cv::VideoWriter* global_video_ptr = nullptr;
 cv::VideoWriter* global_video_ptr2 = nullptr;
+cv::VideoWriter* global_video_ptr3 = nullptr;
 std::shared_ptr<movement_controller> movement = nullptr;
 
 // Signal handler function
@@ -53,6 +54,12 @@ void signalHandler(int signum) {
     global_video_ptr2->release();
     std::cout << "Video2 resources released." << std::endl;
   }
+
+  // Release video if it exists
+  if (global_video_ptr3 != nullptr) {
+    global_video_ptr3->release();
+    std::cout << "Video2 resources released." << std::endl;
+  }
   movement->disable_motors();
   // Exit after a short delay to allow cleanup
   std::exit(signum);
@@ -66,14 +73,14 @@ int main(int argc, char* argv[]) {
   // Set the GST_DEBUG environment variable to a higher level (e.g., 3)
   // setenv("GST_DEBUG", "3", 1);
 
+  navigator_splash_screen();
   std::filesystem::path model_path = "../model.hef";
-
   std::unique_ptr<VideoHandler> video_handler;
   std::string video_file_save;
   if (argc == 2) {
     // If we are passed a file path, check that it is valid and use CV VideoCapture to open it
     std::filesystem::path input_video_path = argv[1];
-    std::cout << input_video_path;
+    std::cout << "Given video file: " << input_video_path << " using it as input video" << std::endl;
     if (!input_video_path.has_extension() &&
         (input_video_path.extension() == ".avi" || input_video_path.extension() == ".mp4")) {
       std::cerr << "Error: Video file must be an avi or mp4" << std::endl;
@@ -100,11 +107,13 @@ int main(int argc, char* argv[]) {
     video_file_save = "/home/autoboat/autoboat_sailing_videos/";
   }
 
-
   video_file_save += uuid::generate_uuid_v4();
+  std::string video_file_mask_save = video_file_save;
+  video_file_mask_save += "_mask.avi";
   video_file_save += ".avi";
 
-  std::cout << video_file_save;
+  std::cout << "Raw video file: " << video_file_save << std::endl;
+  std::cout << "Mask video file: " << video_file_mask_save << std::endl;
 
   std::string mediamtx_rtsp =
       "appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 speed-preset=medium byte-stream=false "
@@ -119,9 +128,14 @@ int main(int argc, char* argv[]) {
                          video_handler->getFPS(),
                          cv::Size(cv::Size(video_handler->getFrameWidth(), video_handler->getFrameHeight())), true);
 
+  cv::VideoWriter video3(video_file_mask_save, cv::CAP_GSTREAMER, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
+                       video_handler->getFPS(),
+                       cv::Size(cv::Size(video_handler->getFrameWidth(), video_handler->getFrameHeight())), true);
+
   // Store video writer pointer in global variable for signal handler
   global_video_ptr = &video;
   global_video_ptr2 = &video2;
+  global_video_ptr3 = &video3;
 
 
  // Set-up webserver
@@ -188,20 +202,33 @@ int main(int argc, char* argv[]) {
     if (largestContourIndex >= 0) {
         cv::Scalar color = cv::Scalar(255, 0, 255);
         cv::drawContours(outFrame, contours, largestContourIndex, color, 2, cv::LINE_8, hierarchy, 0);
-        
-        // Find highest point on the largest contour instead of on the whole mask
-        cv::Point highestPoint(-1, -1);
+
         if (!contours[largestContourIndex].empty()) {
+          // Find highest point on the largest contour instead of on the whole mask
+          cv::Point highestPoint(-1, -1);
             highestPoint = contours[largestContourIndex][0];
             for (const auto& point : contours[largestContourIndex]) {
                 if (point.y < highestPoint.y) {
                     highestPoint = point;
                 }
             }
+
+          // There are always two highest points in the current implementation. Iterate again to find the second one
+          cv::Point otherHighestPoint(-1, -1);
+          for (const auto& point : contours[largestContourIndex]) {
+            if (point.y == highestPoint.y) {
+              otherHighestPoint = point;
+            }
+          }
+
+          cv::Point targetPoint = otherHighestPoint;
+          targetPoint.x = (otherHighestPoint.x - highestPoint.x)/2 + highestPoint.x;
+
           int motor_scale_factor = (video_handler->getFrameWidth() / 51);
           cv::circle(outFrame, highestPoint, 5, cv::Scalar(0, 255, 255), -1);
-          cv::putText(outFrame, std::to_string(highestPoint.x), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0), 2);
-          cv::putText(outFrame, std::to_string(motor_scale_factor), cv::Point(50,100), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,255), 2);
+          cv::circle(outFrame, otherHighestPoint, 5, cv::Scalar(0, 255, 255), -1);
+          cv::circle(outFrame, targetPoint, 5, cv::Scalar(255, 255, 0), -1);
+          //cv::putText(outFrame, std::to_string(highestPoint.x), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0), 2);
           cv::putText(outFrame, std::to_string(highestPoint.x/motor_scale_factor), cv::Point(50,150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
           movement->set_direction(int(highestPoint.x/motor_scale_factor));
           movement->step_direction();
@@ -209,14 +236,15 @@ int main(int argc, char* argv[]) {
     } else {
         // No contours found
         cv::circle(outFrame, cv::Point(-1, -1), 5, cv::Scalar(0, 255, 255), -1);
-
     }
     video.write(outFrame);
+    video3.write(outFrame);
   }
 
   movement->disable_motors();
   global_video_ptr = nullptr;   // Reset the pointer after releasing
   global_video_ptr2 = nullptr;  // Reset the pointer after releasing
+  global_video_ptr3 = nullptr;  // Reset the pointer after releasing
 
   return 0;
 }

@@ -14,6 +14,7 @@
 #include <random>
 #include <sstream>
 #include <cmath>
+#include <iostream>
 /**
  * @brief null check macro taken from
  * tensorflow/lite/examples/minimal/minimal.cc
@@ -63,11 +64,32 @@ const inline std::string getMatType(int type) {
   return r + a;
 }
 
-inline float roundUp(float value, int decimals)
-{
+inline float roundUp(float value, int decimals) {
   float factor = std::pow(10.0f, decimals);
   return std::ceil(value * factor) / factor;
 }
+
+
+inline void navigator_splash_screen() {
+    std::cout << "\n\n" << R"(
+    ░███    ░██                       ░██                         ░██
+    ░████   ░██                                                   ░██
+    ░██░██  ░██  ░██████   ░██    ░██ ░██ ░████████  ░██████   ░████████  ░███████  ░██░████
+    ░██ ░██ ░██       ░██  ░██    ░██ ░██░██    ░██       ░██     ░██    ░██    ░██ ░███
+    ░██  ░██░██  ░███████   ░██  ░██  ░██░██    ░██  ░███████     ░██    ░██    ░██ ░██
+    ░██   ░████ ░██   ░██    ░██░██   ░██░██   ░███ ░██   ░██     ░██    ░██    ░██ ░██
+    ░██    ░███  ░█████░██    ░███    ░██ ░█████░██  ░█████░██     ░████  ░███████  ░██
+                                                ░██
+                                          ░███████
+  )" << "\n" << R"(
+    ░█▀▄░█░█░░░█▀▀░█░░░█▀▀░▀█▀░█▀▀░█░█░█▀▀░█▀▄░░░█░█░█▀█░█░░░█▄█░█▀▀░█░░░█▀▀░█░█
+    ░█▀▄░░█░░░░█▀▀░█░░░█▀▀░░█░░█░░░█▀█░█▀▀░█▀▄░░░█▄█░█▀█░█░░░█░█░▀▀█░█░░░█▀▀░░█░
+    ░▀▀░░░▀░░░░▀░░░▀▀▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░░░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░░▀░
+
+  )" << "\n\n";
+
+}
+
 
 
 namespace uuid {
