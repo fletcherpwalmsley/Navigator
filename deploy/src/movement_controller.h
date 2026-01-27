@@ -23,18 +23,19 @@ public:
     // Direct control of motors
     void set_auto_control(int value);
     void forward(int motor, int pwm_value);
-    void backward(int motor, int pwm_value);void soft_step_motor(int motor, int pwm_value);
+    void backward(int motor, int pwm_value);
+    void soft_step_motor(int motor, int pwm_value);
 
 
 private:
   std::unique_ptr<PCA9685> pwm_driver;
-  const uint8_t pwm_left_pin = 13;
-  const uint8_t in1_left_pin = 11;
-  const uint8_t in2_left_pin = 12;
+  const uint8_t pwm_left_pin = 2; //13
+  const uint8_t in1_left_pin = 4; //11
+  const uint8_t in2_left_pin = 3; //12
 
-  const uint8_t pwm_right_pin = 2;
-  const uint8_t in1_right_pin = 4;
-  const uint8_t in2_right_pin = 3;
+  const uint8_t pwm_right_pin = 13; //2
+  const uint8_t in1_right_pin = 11; //4
+  const uint8_t in2_right_pin = 12; //3
 
   // Values for calculating a smooth transition
   // value can vary do from 0 to 51
