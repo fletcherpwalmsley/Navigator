@@ -90,6 +90,7 @@ PCA9685::PCA9685(uint8_t address, bool dbg)
     i2c.write8(MODE1, mode1);
 
     usleep(5000);
+    setPWMFreq();
 }
 
 void PCA9685::setPWMFreq() {
@@ -135,8 +136,6 @@ int main_2() {
 
     try {
         PCA9685 pwm(0x6f, true);
-
-        pwm.setPWMFreq();      // Servo frequency
 
         // M2 (Right motor)
         pwm.setPWM(pwm_pin_2, 0, 4080);

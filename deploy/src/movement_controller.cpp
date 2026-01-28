@@ -11,7 +11,6 @@
 movement_controller::movement_controller() {
   try {
     pwm_driver = std::make_unique<PCA9685>(0x6f, false);
-    pwm_driver->setPWMFreq();
   } catch (const std::runtime_error& e) {
     std::cerr << "Error initializing motor driver: " << e.what() << std::endl;
     pwm_driver = nullptr;
@@ -76,7 +75,6 @@ void movement_controller::step_direction() {
     }
   }
 
-  /*std::cout << "Current Value: " << current_value << " Target Value: " << target_value <<  std::endl;*/
   uint16_t right_value = current_value * 5;
 
   if (right_value > 255) {
@@ -89,7 +87,6 @@ void movement_controller::step_direction() {
   right_value = right_value * 16;
   left_value = left_value * 16;
 
-  /*std::cout << "Left: " << left_value << " Right: " << right_value << std::endl;*/
 
   pwm_driver->setPWM(pwm_left_pin, 0, left_value);
   pwm_driver->setPWM(pwm_right_pin, 0, right_value);
@@ -114,7 +111,7 @@ void movement_controller::forward(int motor, int pwm_value){
       pwm_driver->setPWM(in2_left_pin, 0, 4096);
 
       pwm_driver->setPWM(in1_right_pin, 4096, 0);
-      pwm_driver->setPWM(in2_right_pin, 0, 4096);\
+      pwm_driver->setPWM(in2_right_pin, 0, 4096);
       last_direction = 1;
 
       if (motor == 0) {

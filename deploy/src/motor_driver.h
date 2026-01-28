@@ -20,13 +20,14 @@ private:
 class PCA9685 {
 public:
   explicit PCA9685(uint8_t address = 0x40, bool dbg = false);
-  void setPWMFreq();
+
   void setPWM(uint8_t channel, uint16_t on, uint16_t off);
-  void setAllPWM(uint16_t on, uint16_t off);
 
 private:
   Raspi_I2C i2c;
   bool debug;
+  void setAllPWM(uint16_t on, uint16_t off);
+  void setPWMFreq();
 
   static constexpr uint8_t MODE1 = 0x00;
   static constexpr uint8_t MODE2 = 0x01;
