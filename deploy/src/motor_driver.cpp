@@ -160,29 +160,34 @@ int PCA9685::setMotorSpeed(Motors selected_motor, int speed){
   // Next slew limit the motor change
   if (std::abs(motor.motorSpeed - speed) > max_change) {
     speed = (speed > motor.motorSpeed) ? motor.motorSpeed + max_change : motor.motorSpeed - max_change;
-    std::cout << "Motor speed slewed to " << speed << std::endl;
+    if (debug)
+      std::cout << "Motor speed slewed to " << speed << std::endl;
   }
 
   // If we are close to zero, disable the motors as they will be stalled anyway
   if (std::abs(speed) < 4) {
     setPWM(motor.pwm, 0, 0);
-    std::cout << "Motor speed is close to zero, disabling motors" << std::endl;
+    if (debug)
+      std::cout << "Motor speed is close to zero, disabling motors" << std::endl;
     motor.motorSpeed = speed;
     return motor.motorSpeed;
   }
 
   // Switched from forward to reverse
   if (speed < 0 && motor.motorSpeed >= 0) {
-    setPWM(motor.in1, 4096, 0);
-    setPWM(motor.in2, 0, 4096);
-    std::cout << "Switched from forward to reverse" << std::endl;
+    setPWM(motor.in1, 0, 4096);
+    setPWM(motor.in2, 4096, 0);
+    if (debug)
+      std::cout << "Switched from forward to reverse" << std::endl;
   }
 
   // Switched from reverse to forward
   if (speed > 0 && motor.motorSpeed <= 0) {
-    setPWM(motor.in1, 0, 4096);
-    setPWM(motor.in2, 4096, 0);
-    std::cout << "Switched from reverse to forward" << std::endl;
+
+    setPWM(motor.in1, 4096, 0);
+    setPWM(motor.in2, 0, 4096);
+    if (debug)
+      std::cout << "Switched from reverse to forward" << std::endl;
   }
 
   // Everything is good, we have a new speed value
@@ -191,7 +196,8 @@ int PCA9685::setMotorSpeed(Motors selected_motor, int speed){
   // Finally, set the PWM values
   int final_pwm_value = std::clamp(std::abs(speed) * multiplier, 0, 4095);
   setPWM(motor.pwm, 0, final_pwm_value);
-  std::cout << "Set motor speed to " << final_pwm_value << std::endl;
+  if (debug)
+    std::cout << "Set motor speed to " << final_pwm_value << std::endl;
   return motor.motorSpeed;
 }
 }
@@ -200,14 +206,6 @@ int PCA9685::setMotorSpeed(Motors selected_motor, int speed){
  * Example usage
  * ============================================================ */
 int main_2() {
-
-    const int pwm_pin_2 = 13;
-    const int in2_2 = 12;
-    const int in1_2 = 11;
-
-    const int pwm_pin_3 = 2;
-    const int in2_3 = 3;
-    const int in1_3 = 4;
 
     try {
       motors::PCA9685 pwm(0x6f, true);

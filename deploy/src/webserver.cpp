@@ -27,14 +27,14 @@ std::future<void> start_webserver(std::shared_ptr<movement_controller> movement_
   CROW_ROUTE(app, "/left/forward/<int>")
   ([](int a)
   {
-    movement->forward(0, a);
+    /*movement->forward(0, a);*/
     return 200;
   });
 
   CROW_ROUTE(app, "/left/backward/<int>")
   ([](int a)
   {
-    movement->backward(0, a);
+    /*movement->backward(0, a);*/
       /*std::cout << "Left: " << a << std::endl;
       return std::to_string(a);*/
     return 200;
@@ -43,7 +43,7 @@ std::future<void> start_webserver(std::shared_ptr<movement_controller> movement_
   CROW_ROUTE(app, "/right/forward/<int>")
   ([](int a)
   {
-    movement->forward(1, a);
+    /*movement->forward(1, a);*/
     return 200;
   });
 
@@ -51,7 +51,7 @@ std::future<void> start_webserver(std::shared_ptr<movement_controller> movement_
   CROW_ROUTE(app, "/right/backward/<int>")
   ([](int a)
   {
-    movement->backward(1, a);
+    /*movement->backward(1, a);*/
     return 200;
   });
 

@@ -140,7 +140,6 @@ int main(int argc, char* argv[]) {
 
  // Set-up webserver
   movement = std::make_shared<movement_controller>();
-  movement->enable_motors();
   auto _a = start_webserver(movement);
 
 #ifdef USE_TFLITE
@@ -154,7 +153,6 @@ int main(int argc, char* argv[]) {
   std::shared_ptr<HailoRunner> runner;
   runner = std::make_unique<HailoRunner>(model_path);
   m_generator = std::make_unique<RiverMaskGenerator>(runner);
-  // Dynamically doing this gets a segfault. Likely need to pass a value through the network first
   cv::Mat mask(cv::Size(runner->GetOutputWidth(), runner->GetOutputHeight()), CV_8UC1);
 #else
   cv::Mat mask(cv::Size(64, 64), CV_8UC1);
@@ -165,7 +163,7 @@ int main(int argc, char* argv[]) {
 
   cv::Mat outFrame;
   std::vector<cv::Mat> inputFrameChannels(3);
-  WeightedMovingAverage wma(0.15);
+  WeightedMovingAverage wma(0.3);
 
   std::cout << "Starting video loop\n";
   while (running) {
@@ -175,7 +173,7 @@ int main(int argc, char* argv[]) {
 #if defined(USE_TFLITE) || defined(USE_HAILO)
     auto output_data = m_generator->GenerateMask(colourCorrectFrame);
     // Apply Closing morphology to the mask
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(6, 6));
     cv::morphologyEx(output_data, output_data, cv::MORPH_CLOSE, kernel);
 
     mask = wma.apply(output_data);
@@ -224,14 +222,15 @@ int main(int argc, char* argv[]) {
           cv::Point targetPoint = otherHighestPoint;
           targetPoint.x = (otherHighestPoint.x - highestPoint.x)/2 + highestPoint.x;
 
-          int motor_scale_factor = (video_handler->getFrameWidth() / 51);
+          int motor_scale_factor = (video_handler->getFrameWidth() / 64);
           cv::circle(outFrame, highestPoint, 5, cv::Scalar(0, 255, 255), -1);
           cv::circle(outFrame, otherHighestPoint, 5, cv::Scalar(0, 255, 255), -1);
           cv::circle(outFrame, targetPoint, 5, cv::Scalar(255, 255, 0), -1);
           //cv::putText(outFrame, std::to_string(highestPoint.x), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0), 2);
-          cv::putText(outFrame, std::to_string(highestPoint.x/motor_scale_factor), cv::Point(50,150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
-          movement->set_direction(int(highestPoint.x/motor_scale_factor));
-          movement->step_direction();
+          cv::putText(outFrame, std::to_string(targetPoint.x/motor_scale_factor), cv::Point(50,150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+          cv::rectangle(outFrame, cv::Rect(targetPoint.x-10, targetPoint.y-10, 20, 20), cv::Scalar(0, 0, 255), 2);
+
+          movement->set_direction(int(targetPoint.x/motor_scale_factor));
         }
     } else {
         // No contours found

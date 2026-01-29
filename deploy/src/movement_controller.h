@@ -9,26 +9,25 @@
 #include <cstdint>
 
 #include "motor_driver.h"
+#include "pid.h"
 
 class movement_controller {
 public:
     movement_controller();
     ~movement_controller(){disable_motors();}
 
-    void enable_motors()const;
     void disable_motors()const;
     void set_direction(int direction);
-    void step_direction();
 
     // Direct control of motors
     void set_auto_control(int value);
-    void forward(int motor, int pwm_value);
-    void backward(int motor, int pwm_value);
-    void soft_step_motor(int motor, int pwm_value);
 
 
 private:
-  std::unique_ptr<PCA9685> pwm_driver;
+  std::unique_ptr<motors::PCA9685> pwm_driver;
+
+  PIDController pid;
+
 
   // Values for calculating a smooth transition
   // value can vary do from 0 to 51
@@ -39,8 +38,6 @@ private:
   // Manual Control toggle
   int auto_control = true;
   int last_direction = 0;
-  uint16_t current_left_pwm = 0;
-  uint16_t current_right_pwm = 0;
 };
 
 
