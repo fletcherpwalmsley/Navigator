@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cstdio>
 #include <stdexcept>
+#include <algorithm>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -17,57 +18,79 @@
 
 #include "motor_driver.h"
 
+#include <algorithm>
+
 /* ============================================================
  * Raspi_I2C – Python-compatible I2C helper
  * ============================================================ */
 
+
+static constexpr uint8_t MODE1 = 0x00;
+static constexpr uint8_t MODE2 = 0x01;
+static constexpr uint8_t PRESCALE = 0xFE;
+
+static constexpr uint8_t LED0_ON_L = 0x06;
+static constexpr uint8_t LED0_ON_H = 0x07;
+static constexpr uint8_t LED0_OFF_L = 0x08;
+static constexpr uint8_t LED0_OFF_H = 0x09;
+static constexpr uint8_t ALL_LED_ON_L  = 0xFA;
+static constexpr uint8_t ALL_LED_ON_H  = 0xFB;
+static constexpr uint8_t ALL_LED_OFF_L = 0xFC;
+static constexpr uint8_t ALL_LED_OFF_H = 0xFD;
+
+static constexpr uint8_t RESTART = 0x80;
+static constexpr uint8_t SLEEP   = 0x10;
+static constexpr uint8_t ALLCALL = 0x01;
+static constexpr uint8_t OUTDRV  = 0x04;
+
+namespace motors {
 Raspi_I2C::Raspi_I2C(uint8_t addr, const std::string& dev)
         : address(addr) {
-      file = open(dev.c_str(), O_RDWR);
-      if (file < 0) {
-        throw std::runtime_error("Failed to open I2C device");
-      }
-      if (ioctl(file, I2C_SLAVE, address) < 0) {
-        throw std::runtime_error("Failed to select I2C slave");
-      }
-      std::cout << "Accessed I2C device at address 0x" << std::hex << int(address) << std::dec << std::endl;
+  file = open(dev.c_str(), O_RDWR);
+  if (file < 0) {
+    throw std::runtime_error("Failed to open I2C device");
+  }
+  if (ioctl(file, I2C_SLAVE, address) < 0) {
+    throw std::runtime_error("Failed to select I2C slave");
+  }
+  std::cout << "Accessed I2C device at address 0x" << std::hex << int(address) << std::dec << std::endl;
 }
 
 Raspi_I2C::~Raspi_I2C() {
-    if (file >= 0)
-        close(file);
+  if (file >= 0)
+    close(file);
 }
 
 int Raspi_I2C::errMsg() const {
-    std::cerr << "Error accessing 0x"
-              << std::hex << int(address)
-              << ": Check your I2C address"
-              << std::dec << std::endl;
-    return -1;
+  std::cerr << "Error accessing 0x"
+            << std::hex << int(address)
+            << ": Check your I2C address"
+            << std::dec << std::endl;
+  return -1;
 }
 
 int Raspi_I2C::write8(uint8_t reg, uint8_t value) const {
-    uint8_t buf[2] = { reg, value };
-    if (::write(file, buf, 2) != 2)
-        return errMsg();
+  uint8_t buf[2] = { reg, value };
+  if (::write(file, buf, 2) != 2)
+    return errMsg();
 
-    if (debug)
-        printf("I2C: Wrote 0x%02X to register 0x%02X\n", value, reg);
-    return 0;
+  if (debug)
+    printf("I2C: Wrote 0x%02X to register 0x%02X\n", value, reg);
+  return 0;
 }
 
 int Raspi_I2C::readU8(uint8_t reg) const  {
-    if (::write(file, &reg, 1) != 1)
-        return errMsg();
+  if (::write(file, &reg, 1) != 1)
+    return errMsg();
 
-    uint8_t result;
-    if (::read(file, &result, 1) != 1)
-        return errMsg();
+  uint8_t result;
+  if (::read(file, &result, 1) != 1)
+    return errMsg();
 
-    if (debug)
-        printf("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X\n",
-               address, result, reg);
-    return result;
+  if (debug)
+    printf("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X\n",
+           address, result, reg);
+  return result;
 }
 
 
@@ -77,49 +100,101 @@ int Raspi_I2C::readU8(uint8_t reg) const  {
 PCA9685::PCA9685(uint8_t address, bool dbg)
     : i2c(address), debug(dbg)
 {
-    i2c.debug = debug;
+  i2c.debug = debug;
 
-    setAllPWM(0, 0);
-    i2c.write8(MODE2, OUTDRV);
-    i2c.write8(MODE1, ALLCALL);
+  setAllPWM(0, 0);
+  i2c.write8(MODE2, OUTDRV);
+  i2c.write8(MODE1, ALLCALL);
 
-    usleep(5000);
+  usleep(5000);
 
-    uint8_t mode1 = i2c.readU8(MODE1);
-    mode1 &= ~SLEEP;
-    i2c.write8(MODE1, mode1);
+  uint8_t mode1 = i2c.readU8(MODE1);
+  mode1 &= ~SLEEP;
+  i2c.write8(MODE1, mode1);
 
-    usleep(5000);
-    setPWMFreq();
+  usleep(5000);
+  setPWMFreq();
 }
 
 void PCA9685::setPWMFreq() {
-    uint8_t prescale = 3;
-    uint8_t oldmode = i2c.readU8(MODE1);
-    uint8_t newmode = (oldmode & 0x7F) | SLEEP;
+  uint8_t prescale = 3;
+  uint8_t oldmode = i2c.readU8(MODE1);
+  uint8_t newmode = (oldmode & 0x7F) | SLEEP;
 
-    i2c.write8(MODE1, newmode);
-    i2c.write8(PRESCALE, prescale);
-    i2c.write8(MODE1, oldmode);
+  i2c.write8(MODE1, newmode);
+  i2c.write8(PRESCALE, prescale);
+  i2c.write8(MODE1, oldmode);
 
-    usleep(5000);
-    i2c.write8(MODE1, oldmode | RESTART);
+  usleep(5000);
+  i2c.write8(MODE1, oldmode | RESTART);
 }
 
 void PCA9685::setPWM(uint8_t channel, uint16_t on, uint16_t off) {
-        i2c.write8(LED0_ON_L+4*channel, on & 0xFF);
-        i2c.write8(LED0_ON_H+4*channel, on >> 8);
-        i2c.write8(LED0_OFF_L+4*channel, off & 0xFF);
-        i2c.write8(LED0_OFF_H+4*channel, off >> 8);
-    }
-
-void PCA9685::setAllPWM(uint16_t on, uint16_t off) {
-    i2c.write8(ALL_LED_ON_L,  on & 0xFF);
-    i2c.write8(ALL_LED_ON_H,  on >> 8);
-    i2c.write8(ALL_LED_OFF_L, off & 0xFF);
-    i2c.write8(ALL_LED_OFF_H, off >> 8);
+  i2c.write8(LED0_ON_L+4*channel, on & 0xFF);
+  i2c.write8(LED0_ON_H+4*channel, on >> 8);
+  i2c.write8(LED0_OFF_L+4*channel, off & 0xFF);
+  i2c.write8(LED0_OFF_H+4*channel, off >> 8);
 }
 
+void PCA9685::setAllPWM(uint16_t on, uint16_t off) {
+  i2c.write8(ALL_LED_ON_L,  on & 0xFF);
+  i2c.write8(ALL_LED_ON_H,  on >> 8);
+  i2c.write8(ALL_LED_OFF_L, off & 0xFF);
+  i2c.write8(ALL_LED_OFF_H, off >> 8);
+}
+
+/**
+ * Sets the output speed of the left motor
+ * @param motor Which motor to set
+ * @param speed Value between 32 to -32. With this being from full forward to full reverse
+ */
+int PCA9685::setMotorSpeed(Motors selected_motor, int speed){
+  constexpr int multiplier = 128;
+  constexpr int max_change = 5;
+
+  Motor& motor = (selected_motor == Left) ? m_leftMotor : m_rightMotor;
+
+  // First, check that we are not going to overshoot the limit
+  speed = std::clamp(speed, -32, 32);
+
+  // Next slew limit the motor change
+  if (std::abs(motor.motorSpeed - speed) > max_change) {
+    speed = (speed > motor.motorSpeed) ? motor.motorSpeed + max_change : motor.motorSpeed - max_change;
+    std::cout << "Motor speed slewed to " << speed << std::endl;
+  }
+
+  // If we are close to zero, disable the motors as they will be stalled anyway
+  if (std::abs(speed) < 4) {
+    setPWM(motor.pwm, 0, 0);
+    std::cout << "Motor speed is close to zero, disabling motors" << std::endl;
+    motor.motorSpeed = speed;
+    return motor.motorSpeed;
+  }
+
+  // Switched from forward to reverse
+  if (speed < 0 && motor.motorSpeed >= 0) {
+    setPWM(motor.in1, 4096, 0);
+    setPWM(motor.in2, 0, 4096);
+    std::cout << "Switched from forward to reverse" << std::endl;
+  }
+
+  // Switched from reverse to forward
+  if (speed > 0 && motor.motorSpeed <= 0) {
+    setPWM(motor.in1, 0, 4096);
+    setPWM(motor.in2, 4096, 0);
+    std::cout << "Switched from reverse to forward" << std::endl;
+  }
+
+  // Everything is good, we have a new speed value
+  motor.motorSpeed = speed;
+
+  // Finally, set the PWM values
+  int final_pwm_value = std::clamp(std::abs(speed) * multiplier, 0, 4095);
+  setPWM(motor.pwm, 0, final_pwm_value);
+  std::cout << "Set motor speed to " << final_pwm_value << std::endl;
+  return motor.motorSpeed;
+}
+}
 
 /* ============================================================
  * Example usage
@@ -135,10 +210,36 @@ int main_2() {
     const int in1_3 = 4;
 
     try {
-        PCA9685 pwm(0x6f, true);
+      motors::PCA9685 pwm(0x6f, true);
 
+      constexpr float wait_time  = 2e5;
+      while (pwm.setMotorSpeed(motors::Left, 32) != 32) {
+        usleep(wait_time);
+      }
+
+      while (pwm.setMotorSpeed(motors::Right, 32) != 32) {
+        usleep(wait_time);
+      }
+
+      sleep(5);
+
+      while (pwm.setMotorSpeed(motors::Left, -32) != -32) {
+        usleep(wait_time);
+      }
+
+      while (pwm.setMotorSpeed(motors::Right, -32) != -32) {
+        usleep(wait_time);
+      }
+
+      while (pwm.setMotorSpeed(motors::Left, 0) != 0) {
+        usleep(wait_time);
+      }
+
+      while (pwm.setMotorSpeed(motors::Right, 0) != 0) {
+        usleep(wait_time);
+      }
         // M2 (Right motor)
-        pwm.setPWM(pwm_pin_2, 0, 4080);
+        /*pwm.setPWM(pwm_pin_2, 0, 4080);
         pwm.setPWM(in2_2, 0, 4096);
         pwm.setPWM(in1_2, 4096, 0);
 
@@ -163,7 +264,7 @@ int main_2() {
         pwm.setPWM(in2_2, 0, 4096);
         pwm.setPWM(in1_2, 0, 4096);
         pwm.setPWM(in2_3, 0, 4096);
-        pwm.setPWM(in1_3, 0, 4096);
+        pwm.setPWM(in1_3, 0, 4096);*/
 
         // Speed set with variing the large value by (0-255)*16 on the PWM pin
         // Flip in1 and 2 values for reverse
